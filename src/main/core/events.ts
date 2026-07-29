@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron'
 import type { OrbitEventName, OrbitEvents } from '../../shared/api'
 
-/** Fan a payload out to every live renderer. */
+
 export function emit<K extends OrbitEventName>(event: K, payload: OrbitEvents[K]): void {
   for (const win of BrowserWindow.getAllWindows()) {
     if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
@@ -10,10 +10,10 @@ export function emit<K extends OrbitEventName>(event: K, payload: OrbitEvents[K]
   }
 }
 
-/**
- * Coalesces high-frequency events (download progress, log lines) into at most
- * one send per frame budget so the renderer never drowns in IPC traffic.
- */
+
+
+
+
 export function createThrottledEmitter<K extends OrbitEventName>(
   event: K,
   intervalMs: number,

@@ -100,9 +100,9 @@ class InstanceManager {
   private statuses = new Map<string, InstanceStatus>()
   private loaded = false
 
-  /* ---------------------------------------------------------------- */
-  /* Loading & persistence                                            */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async load(): Promise<void> {
     this.cache.clear()
@@ -113,7 +113,7 @@ class InstanceManager {
       if (!entry.isDirectory()) continue
       const config = await readJson<Instance>(paths.instanceConfigFile(entry.name))
       if (!config?.id) continue
-      // The folder on disk is the source of truth if it was renamed externally.
+
       config.folder = entry.name
       config.settings = { ...emptyInstanceSettings(), ...config.settings }
       config.history ??= []
@@ -140,9 +140,9 @@ class InstanceManager {
     emit('instances:changed', undefined)
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Reads                                                            */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async list(): Promise<InstanceSummary[]> {
     await this.ensureLoaded()
@@ -160,7 +160,7 @@ class InstanceManager {
     return instance ? this.decorate(instance) : null
   }
 
-  /** Throws with a friendly message instead of returning null. */
+
   async require(id: string): Promise<Instance> {
     await this.ensureLoaded()
     const instance = this.cache.get(id)
@@ -190,9 +190,9 @@ class InstanceManager {
     return [...set].sort((a, b) => a.localeCompare(b))
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Status                                                           */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   setStatus(id: string, status: InstanceStatus, detail?: string): void {
     if (status === 'idle') this.statuses.delete(id)
@@ -208,9 +208,9 @@ class InstanceManager {
     return Object.fromEntries(this.statuses)
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Writes                                                           */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async create(req: InstanceCreateRequest): Promise<Instance> {
     await this.ensureLoaded()
@@ -237,7 +237,7 @@ class InstanceManager {
   async update(id: string, patch: Partial<Instance>): Promise<Instance> {
     const instance = await this.require(id)
 
-    // Structural fields are managed by dedicated methods.
+
     const { id: _id, folder: _folder, history: _history, ...safe } = patch
     Object.assign(instance, safe)
 
@@ -317,9 +317,9 @@ class InstanceManager {
     return instance
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Artwork                                                          */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async setIconFromFile(id: string, sourcePath: string): Promise<Instance> {
     const instance = await this.require(id)
@@ -368,9 +368,9 @@ class InstanceManager {
     return (await exists(file)) ? mediaUrl(file, instance.updatedAt) : null
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Files                                                            */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async openFolder(id: string, sub?: string): Promise<void> {
     const instance = await this.require(id)
@@ -384,11 +384,11 @@ class InstanceManager {
     return dirSize(paths.instanceDir(instance.folder))
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Installation                                                     */
-  /* ---------------------------------------------------------------- */
 
-  /** Resolves the loader profile then downloads everything the game needs. */
+
+
+
+
   async ensureInstalled(id: string, existingTask?: TaskHandle): Promise<string> {
     const instance = await this.require(id)
 
@@ -425,9 +425,9 @@ class InstanceManager {
     )
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Playtime & history                                               */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async recordLaunchStart(id: string, accountId: string | null, accountName: string | null): Promise<LaunchRecord> {
     const instance = await this.require(id)
@@ -472,9 +472,9 @@ class InstanceManager {
     this.notify()
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Backups                                                          */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async listBackups(id: string): Promise<BackupInfo[]> {
     const instance = await this.require(id)
@@ -592,9 +592,9 @@ class InstanceManager {
     await removePath(`${archive}.json`).catch(() => undefined)
   }
 
-  /* ---------------------------------------------------------------- */
-  /* Import / export                                                  */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   async export(id: string, targetPath: string, options: InstanceExportOptions): Promise<string> {
     const instance = await this.require(id)
@@ -707,14 +707,14 @@ class InstanceManager {
     })
   }
 
-  /** Used by the modpack installer to register a freshly built instance. */
+
   async register(instance: Instance): Promise<Instance> {
     await this.persist(instance)
     this.notify()
     return instance
   }
 
-  /** Creates the folder skeleton for an instance the modpack installer will fill. */
+
   async scaffold(req: InstanceCreateRequest): Promise<Instance> {
     await this.ensureLoaded()
     const folder = await uniqueFolderName(paths.instancesDir, req.name)

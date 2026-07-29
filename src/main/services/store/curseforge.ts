@@ -18,7 +18,7 @@ const MINECRAFT_GAME_ID = 432
 const TTL_SHORT = 5 * 60 * 1000
 const TTL_LONG = 60 * 60 * 1000
 
-/** CurseForge "class" ids for the Minecraft game. */
+
 const CLASS_IDS: Record<ContentKind, number> = {
   mod: 6,
   resourcepack: 12,
@@ -28,7 +28,7 @@ const CLASS_IDS: Record<ContentKind, number> = {
   world: 17
 }
 
-/** modLoaderType values in the CurseForge search API. */
+
 const LOADER_IDS: Partial<Record<LoaderType, number>> = {
   forge: 1,
   fabric: 4,
@@ -77,9 +77,9 @@ export function isConfigured(): boolean {
   return settings.get().curseforgeApiKey.trim().length > 0
 }
 
-/* ------------------------------------------------------------------ */
-/* Wire shapes                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface CfAuthor {
   id: number
@@ -149,13 +149,13 @@ interface Envelope<T> {
   pagination?: { index: number; pageSize: number; resultCount: number; totalCount: number }
 }
 
-/* ------------------------------------------------------------------ */
-/* Mapping                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 const RELEASE_TYPES: Record<number, StoreVersionChannel> = { 1: 'release', 2: 'beta', 3: 'alpha' }
 
-/** CurseForge relationType: 1 embedded, 2 optional, 3 required, 4 tool, 5 incompatible, 6 include. */
+
 const RELATION_TYPES: Record<number, StoreDependency['type']> = {
   1: 'embedded',
   2: 'optional',
@@ -178,11 +178,11 @@ function minecraftVersions(gameVersions: string[]): string[] {
 }
 
 function hashOf(file: CfFile, algo: 1 | 2): string | null {
-  // algo 1 = SHA-1, 2 = MD5
+
   return file.hashes?.find((hash) => hash.algo === algo)?.value?.toLowerCase() ?? null
 }
 
-/** Some projects opt out of third-party downloads; reconstruct the CDN path. */
+
 function downloadUrlFor(file: CfFile): string {
   if (file.downloadUrl) return file.downloadUrl
   const id = String(file.id)
@@ -267,9 +267,9 @@ function mapFile(file: CfFile): StoreVersion {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* API                                                                 */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export async function search(query: StoreSearchQuery): Promise<StoreSearchResult> {
   const url = new URL(`${BASE}/mods/search`)
@@ -373,7 +373,7 @@ export async function version(_projectId: string, fileId: string): Promise<Store
   return mapFile(response.data)
 }
 
-/** Bulk lookup used when importing a CurseForge modpack manifest. */
+
 export async function filesByIds(fileIds: number[]): Promise<Map<string, StoreVersion>> {
   const out = new Map<string, StoreVersion>()
   for (let i = 0; i < fileIds.length; i += 200) {

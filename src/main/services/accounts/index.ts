@@ -7,7 +7,7 @@ import { paths } from '../../core/paths'
 import { AuthError, cancelInteractiveLogin, refreshSession, signIn, type AuthSession } from './auth'
 
 interface StoredSecret {
-  /** Base64 DPAPI blob, or plain text when encryption is unavailable. */
+
   value: string
   encrypted: boolean
 }
@@ -50,7 +50,7 @@ function toPublic(stored: StoredAccount): Account {
   return rest
 }
 
-/** Refresh a little early so a launch never races the expiry. */
+
 const REFRESH_MARGIN_MS = 5 * 60 * 1000
 
 class AccountStore {
@@ -112,7 +112,7 @@ class AccountStore {
     }
   }
 
-  /** Interactive add. Rejects any account without a genuine Minecraft licence. */
+
   async add(): Promise<Account> {
     const session = await signIn()
     const existing = this.find(session.uuid)
@@ -146,7 +146,7 @@ class AccountStore {
     await this.persist()
   }
 
-  /** Forces a token refresh; surfaces errors to the caller. */
+
   async refresh(id: string): Promise<Account> {
     const refreshed = await this.refreshInternal(id)
     return toPublic(refreshed)
@@ -185,10 +185,10 @@ class AccountStore {
     return task
   }
 
-  /**
-   * Returns a launch-ready token for the account, refreshing transparently when
-   * the current one is close to expiring.
-   */
+
+
+
+
   async getValidToken(id: string): Promise<{ account: Account; accessToken: string }> {
     let account = this.find(id)
     if (!account) throw new Error('That account is no longer signed in.')
@@ -203,7 +203,7 @@ class AccountStore {
     return { account: toPublic(account), accessToken }
   }
 
-  /** Best-effort background refresh at startup so launching is instant. */
+
   async refreshExpiringInBackground(): Promise<void> {
     const soon = Date.now() + 30 * 60 * 1000
     for (const account of this.file.accounts) {

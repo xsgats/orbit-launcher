@@ -29,7 +29,7 @@ import * as updater from './services/updater'
 
 type Handler = (...args: never[]) => unknown
 
-/** Registers a handler and turns thrown errors into clean renderer-side rejections. */
+
 function handle(channel: string, handler: Handler): void {
   ipcMain.handle(channel, async (_event, ...args) => {
     try {
@@ -47,9 +47,9 @@ function focusedWindow(): BrowserWindow | null {
 }
 
 export function registerIpc(): void {
-  /* ---------------------------------------------------------------- */
-  /* App                                                              */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('app:getSystemInfo', () => ({
     platform: process.platform,
@@ -130,18 +130,18 @@ export function registerIpc(): void {
     return image.isEmpty() ? null : image.toDataURL()
   })
 
-  /* ---------------------------------------------------------------- */
-  /* Settings                                                         */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('settings:get', () => settings.get())
   handle('settings:update', (patch) => settings.update(patch as never))
   handle('settings:reset', () => settings.reset())
   handle('settings:openDataFolder', () => shell.openPath(paths.dataRoot))
 
-  /* ---------------------------------------------------------------- */
-  /* Accounts                                                         */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('accounts:list', () => accounts.list())
   handle('accounts:getActive', () => accounts.getActive())
@@ -151,9 +151,9 @@ export function registerIpc(): void {
   handle('accounts:refresh', (id: string) => accounts.refresh(id))
   handle('accounts:cancelLogin', () => accounts.cancelLogin())
 
-  /* ---------------------------------------------------------------- */
-  /* Java                                                             */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('java:list', () => java.list())
   handle('java:scan', () => java.scan())
@@ -164,9 +164,9 @@ export function registerIpc(): void {
   handle('java:test', (path: string) => java.test(path))
   handle('java:recommendedFor', (version: string) => java.recommendedMajorFor(version))
 
-  /* ---------------------------------------------------------------- */
-  /* Versions                                                         */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('versions:minecraft', (refresh?: boolean) => getManifest(refresh ?? false))
   handle('versions:loader', (loader: LoaderType, minecraftVersion: string) =>
@@ -174,9 +174,9 @@ export function registerIpc(): void {
   )
   handle('versions:loaderSupportedMinecraft', (loader: LoaderType) => loaderSupportedMinecraft(loader))
 
-  /* ---------------------------------------------------------------- */
-  /* Instances                                                        */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('instances:list', () => instances.list())
   handle('instances:get', (id: string) => instances.get(id))
@@ -210,7 +210,7 @@ export function registerIpc(): void {
   )
 
   handle('instances:import', async (sourcePath: string) => {
-    // Orbit exports, .mrpack and CurseForge zips all arrive through this door.
+
     const orbitManifest = await readZipJson<unknown>(sourcePath, 'orbit-instance.json').catch(() => null)
     if (orbitManifest) return instances.import(sourcePath)
 
@@ -225,9 +225,9 @@ export function registerIpc(): void {
   handle('instances:deleteBackup', (id: string, backupId: string) => instances.deleteBackup(id, backupId))
   handle('instances:history', async (id: string) => (await instances.require(id)).history)
 
-  /* ---------------------------------------------------------------- */
-  /* Content                                                          */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('content:list', (id: string, kind: ContentKind) => content.listContent(id, kind))
   handle('content:setEnabled', (id: string, contentId: string, enabled: boolean) =>
@@ -281,9 +281,9 @@ export function registerIpc(): void {
   )
   handle('content:servers', (id: string) => content.listServers(id))
 
-  /* ---------------------------------------------------------------- */
-  /* Store                                                            */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('store:search', (query) => store.search(query as never))
   handle('store:project', (provider: ContentProvider, projectId: string) => store.project(provider, projectId))
@@ -298,9 +298,9 @@ export function registerIpc(): void {
   handle('store:updateModpack', (id: string, versionId: string) => store.updateModpack(id, versionId))
   handle('store:featured', (kind: ContentKind) => store.featured(kind))
 
-  /* ---------------------------------------------------------------- */
-  /* Tasks, logs, news, notifications, updater                        */
-  /* ---------------------------------------------------------------- */
+
+
+
 
   handle('tasks:list', () => tasks.list())
   handle('tasks:cancel', (id: string) => tasks.cancel(id))

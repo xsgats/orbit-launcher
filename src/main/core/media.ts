@@ -6,11 +6,11 @@ import { log } from './logger'
 
 export const MEDIA_SCHEME = 'orbit-media'
 
-/**
- * Renderer-safe URL for a file on disk. Only paths inside the launcher's own
- * data root are ever served, so a malicious mod cannot make the UI read
- * arbitrary files.
- */
+
+
+
+
+
 export function mediaUrl(absolutePath: string, cacheKey?: string | number): string {
   const encoded = Buffer.from(absolutePath, 'utf8').toString('base64url')
   const suffix = cacheKey === undefined ? '' : `?v=${encodeURIComponent(String(cacheKey))}`

@@ -5,11 +5,11 @@ import { saveVersionJson } from '../minecraft/versions'
 import type { VersionJson } from '../minecraft/schema'
 import type { TaskHandle } from '../tasks'
 
-/** Fabric and Quilt publish the same meta API shape, so one client covers both. */
+
 interface FabricMetaBase {
   name: string
   baseUrl: string
-  /** Path segment used in `/versions/loader/...`. */
+
   loaderKey: 'fabric' | 'quilt'
 }
 
@@ -32,7 +32,7 @@ const TTL = 10 * 60 * 1000
 
 function isStable(kind: 'fabric' | 'quilt', entry: MetaLoaderEntry): boolean {
   if (typeof entry.loader.stable === 'boolean') return entry.loader.stable
-  // Quilt omits `stable`; anything with a pre-release suffix is a beta.
+
   return kind === 'quilt' ? !/-(beta|alpha|rc|pre)/i.test(entry.loader.version) : true
 }
 
@@ -80,11 +80,11 @@ export async function latestLoaderVersion(
   return chosen.id
 }
 
-/**
- * Installs a Fabric/Quilt profile by saving its generated version manifest.
- * The libraries themselves are fetched by the normal version installer, which
- * follows `inheritsFrom` back to vanilla.
- */
+
+
+
+
+
 export async function installFabricLike(
   kind: 'fabric' | 'quilt',
   minecraftVersion: string,

@@ -43,9 +43,9 @@ function greeting(): string {
   return 'Good evening'
 }
 
-/* ------------------------------------------------------------------ */
-/* Featured instance                                                  */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function FeatureCard(): React.JSX.Element | null {
   const instances = useOrbit((state) => state.instances)
@@ -145,9 +145,9 @@ function FeatureCard(): React.JSX.Element | null {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Stats                                                              */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function Stats({ system }: { system: SystemInfo | null }): React.JSX.Element {
   const instances = useOrbit((state) => state.instances)
@@ -206,9 +206,9 @@ function Stats({ system }: { system: SystemInfo | null }): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Recent instances strip                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function RecentStrip(): React.JSX.Element {
   const instances = useOrbit((state) => state.instances)
@@ -292,9 +292,9 @@ function RecentTile({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Activity                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function Activity(): React.JSX.Element {
   const instances = useOrbit((state) => state.instances)
@@ -353,9 +353,9 @@ function Activity(): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* News strip                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function NewsStrip(): React.JSX.Element | null {
   const showNews = useOrbit((state) => state.settings?.showNewsOnHome ?? true)
@@ -441,9 +441,9 @@ function NewsStrip(): React.JSX.Element | null {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Page                                                               */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function HomePage(): React.JSX.Element {
   const instances = useOrbit((state) => state.instances)

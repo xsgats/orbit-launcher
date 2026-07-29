@@ -1,10 +1,10 @@
-/* ==================================================================
-   Orbit Launcher — design tokens
-   One accent, three surface depths, a strict type ramp.
-   ================================================================== */
+
+
+
+
 
 :root {
-  /* Accent — overwritten at runtime from user settings */
+
   --accent: #6c7bff;
   --accent-hover: #8290ff;
   --accent-press: #5a68e6;
@@ -15,12 +15,12 @@
   --accent-a40: rgb(108 123 255 / 40%);
   --accent-glow: rgb(108 123 255 / 32%);
 
-  /* Brand secondaries — used for gradients and loader identity */
+
   --cyan: #35e0f0;
   --violet: #b15cff;
   --pink: #ff6ba8;
 
-  /* Semantic */
+
   --success: #37d399;
   --success-a14: rgb(55 211 153 / 14%);
   --warning: #ffb84d;
@@ -30,14 +30,14 @@
   --danger-a24: rgb(255 107 122 / 24%);
   --info: #58b6ff;
 
-  /* Loader identity colours */
+
   --loader-vanilla: #8fb45b;
   --loader-fabric: #c8ab6b;
   --loader-quilt: #b47bd6;
   --loader-forge: #6e8bb5;
   --loader-neoforge: #e08a4a;
 
-  /* Radii */
+
   --r-xs: 6px;
   --r-sm: 9px;
   --r-md: 13px;
@@ -46,7 +46,7 @@
   --r-2xl: 32px;
   --r-full: 999px;
 
-  /* Spacing ramp */
+
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
@@ -58,7 +58,7 @@
   --s-9: 56px;
   --s-10: 72px;
 
-  /* Type */
+
   --font-ui:
     'Segoe UI Variable Display', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system,
     'Inter', sans-serif;
@@ -72,7 +72,7 @@
   --t-small: 450 12.5px/1.45 var(--font-ui);
   --t-tiny: 560 11px/1.35 var(--font-ui);
 
-  /* Motion */
+
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -80,7 +80,7 @@
   --d-base: 200ms;
   --d-slow: 340ms;
 
-  /* Layout */
+
   --titlebar-h: 46px;
   --sidebar-w: 244px;
   --sidebar-w-collapsed: 74px;
@@ -89,9 +89,9 @@
   color-scheme: dark;
 }
 
-/* ------------------------------------------------------------------
-   Dark (default)
-   ------------------------------------------------------------------ */
+
+
+
 :root,
 [data-theme='dark'] {
   --bg-base: #07080e;
@@ -123,9 +123,9 @@
   --scrim: rgb(4 5 10 / 72%);
 }
 
-/* ------------------------------------------------------------------
-   Midnight — deeper, higher contrast, for OLED
-   ------------------------------------------------------------------ */
+
+
+
 [data-theme='midnight'] {
   --bg-base: #000000;
   --bg-canvas: #04050a;
@@ -150,9 +150,9 @@
   --scrim: rgb(0 0 0 / 80%);
 }
 
-/* ------------------------------------------------------------------
-   Light
-   ------------------------------------------------------------------ */
+
+
+
 [data-theme='light'] {
   --bg-base: #eef0f7;
   --bg-canvas: #f6f7fb;

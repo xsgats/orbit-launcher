@@ -1,9 +1,9 @@
 import { gunzipSync, inflateSync } from 'node:zlib'
 
-/**
- * Minimal big-endian NBT reader — enough to pull metadata out of `level.dat`.
- * Longs are returned as `bigint` so world seeds survive intact.
- */
+
+
+
+
 
 export type NbtValue =
   | number
@@ -140,9 +140,9 @@ function readPayload(reader: Reader, type: number, depth: number): NbtValue {
 }
 
 function decompress(buffer: Buffer): Buffer {
-  // gzip
+
   if (buffer[0] === 0x1f && buffer[1] === 0x8b) return gunzipSync(buffer)
-  // raw zlib
+
   if (buffer[0] === 0x78) return inflateSync(buffer)
   return buffer
 }
@@ -153,14 +153,14 @@ export function parseNbt(raw: Buffer): Record<string, NbtValue> | null {
     const reader = new Reader(buffer)
     const type = reader.u1()
     if (type !== TAG_COMPOUND) return null
-    reader.string() // root name, conventionally empty
+    reader.string()
     return readPayload(reader, TAG_COMPOUND, 0) as Record<string, NbtValue>
   } catch {
     return null
   }
 }
 
-/** Safe dotted-path lookup: `get(root, 'Data', 'Version', 'Name')`. */
+
 export function nbtGet(root: NbtValue | null | undefined, ...path: string[]): NbtValue | undefined {
   let current: NbtValue | null | undefined = root
   for (const key of path) {

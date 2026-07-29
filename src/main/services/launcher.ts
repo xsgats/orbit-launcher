@@ -32,7 +32,7 @@ interface RunningGame {
 
 const running = new Map<string, RunningGame>()
 
-/** Reads a per-instance setting, falling back to the global default. */
+
 function resolveSetting<K extends keyof InstanceSettings>(
   instance: Instance,
   key: K,
@@ -46,7 +46,7 @@ function substitute(template: string, values: Record<string, string>): string {
   return template.replace(/\$\{([\w.]+)\}/g, (match, key: string) => values[key] ?? match)
 }
 
-/** Legacy manifests provide one flat argument string instead of a rule list. */
+
 function legacyGameArguments(version: VersionJson): string[] {
   return version.minecraftArguments ? version.minecraftArguments.split(/\s+/).filter(Boolean) : []
 }
@@ -88,17 +88,17 @@ export async function launchInstance(options: LaunchOptions): Promise<void> {
       logStore.note(instance.id, `Preparing ${instance.name} (${instance.minecraftVersion}, ${instance.loader})`)
 
       try {
-        /* 1. Credentials — refreshed transparently if close to expiry. */
+
         task.setDetail('Checking your Microsoft session…')
         const { account, accessToken } = await accounts.getValidToken(activeAccount)
 
-        /* 2. Game files — ensureInstalled resolves the loader and downloads everything. */
+
         task.setDetail('Verifying game files…')
         instances.setStatus(instance.id, 'downloading')
         const versionId = await instances.ensureInstalled(instance.id, task.slice(0.05, 0.9))
         const version = await resolveVersion(versionId)
 
-        /* 3. Java. */
+
         task.setDetail('Selecting a Java runtime…')
         instances.setStatus(instance.id, 'launching')
         const requiredMajor = version.javaMajor || java.recommendedMajorFor(instance.minecraftVersion)
@@ -107,7 +107,7 @@ export async function launchInstance(options: LaunchOptions): Promise<void> {
           path: instance.settings.javaPathOverride
         })
 
-        /* 4. Build the command line. */
+
         const gameDir = instances.gameDir(instance)
         await ensureDir(gameDir)
 
@@ -129,14 +129,14 @@ export async function launchInstance(options: LaunchOptions): Promise<void> {
         )
         logStore.note(instance.id, `Main class: ${version.mainClass}`)
 
-        /* 5. Optional pre-launch hook. */
+
         const preLaunch = instance.settings.preLaunchCommand?.trim()
         if (preLaunch) {
           logStore.note(instance.id, `Running pre-launch command: ${preLaunch}`)
           await runHook(preLaunch, gameDir, instance.id)
         }
 
-        /* 6. Go. */
+
         task.setDetail('Starting Minecraft…')
         await spawnGame({
           instance,
@@ -157,9 +157,9 @@ export async function launchInstance(options: LaunchOptions): Promise<void> {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Command construction                                                */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface CommandContext {
   instance: Instance
@@ -229,7 +229,7 @@ async function buildCommand(context: CommandContext): Promise<string[]> {
     quickPlayRealms: ''
   }
 
-  /* --- JVM arguments --- */
+
   const jvmFromManifest = resolveArguments(version.arguments?.jvm, features)
   const jvmTemplate = jvmFromManifest.length ? jvmFromManifest : DEFAULT_JVM_ARGUMENTS
   const jvmArgs = jvmTemplate.map((arg) => substitute(arg, values))
@@ -240,7 +240,7 @@ async function buildCommand(context: CommandContext): Promise<string[]> {
     .split(/\s+/)
     .map((arg) => arg.trim())
     .filter(Boolean)
-    // Memory flags are managed by the sliders, not free-form args.
+
     .filter((arg) => !/^-Xm[sx]/i.test(arg))
 
   const loggingArgs: string[] = []
@@ -249,7 +249,7 @@ async function buildCommand(context: CommandContext): Promise<string[]> {
     loggingArgs.push(substitute(version.logging.client.argument, { path: loggingFile }))
   }
 
-  /* --- Game arguments --- */
+
   const gameFromManifest = resolveArguments(version.arguments?.game, features)
   const gameTemplate = gameFromManifest.length ? gameFromManifest : legacyGameArguments(version)
   const gameArgs = gameTemplate.map((arg) => substitute(arg, values))
@@ -273,9 +273,9 @@ async function buildCommand(context: CommandContext): Promise<string[]> {
   ]
 }
 
-/* ------------------------------------------------------------------ */
-/* Process supervision                                                 */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface SpawnContext {
   instance: Instance
@@ -292,7 +292,7 @@ async function spawnGame(context: SpawnContext): Promise<void> {
 
   const environment = { ...process.env, ...(instance.settings.environmentVariables ?? {}) }
 
-  // Redacted copy for the log — the access token never touches disk.
+
   logStore.note(
     instance.id,
     `Command: "${javaPath}" ${command
@@ -335,7 +335,7 @@ async function spawnGame(context: SpawnContext): Promise<void> {
   })
 
   if (resolveSetting(instance, 'closeLauncherOnLaunch', config.closeLauncherOnLaunch)) {
-    // Give the JVM a moment to fail fast before hiding the launcher.
+
     setTimeout(() => {
       if (running.has(instance.id)) {
         for (const window of BrowserWindow.getAllWindows()) window.hide()
@@ -367,7 +367,7 @@ async function handleExit(
   await instances.recordLaunchEnd(instance.id, startedAt, code, crashed, crashReport)
   instances.setStatus(instance.id, crashed ? 'crashed' : 'idle')
 
-  // Reset the badge after the user has had a chance to see it.
+
   if (crashed) setTimeout(() => instances.setStatus(instance.id, 'idle'), 30_000)
 
   for (const window of BrowserWindow.getAllWindows()) {
@@ -422,13 +422,13 @@ export async function killInstance(instanceId: string): Promise<void> {
   logStore.note(instanceId, 'Stopping the game…')
 
   entry.child.kill()
-  // Windows JVMs occasionally ignore the first signal.
+
   setTimeout(() => {
     if (running.has(instanceId) && entry.child.pid) {
       try {
         process.kill(entry.child.pid, 'SIGKILL')
       } catch {
-        /* already gone */
+
       }
     }
   }, 4_000)

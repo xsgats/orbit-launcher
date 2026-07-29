@@ -82,7 +82,7 @@ export function DiscoverPage(): React.JSX.Element {
   const [offset, setOffset] = useState(0)
   const sentinel = useRef<HTMLDivElement>(null)
 
-  /* Seed filters from the instance the user came from. */
+
   useEffect(() => {
     if (!targetInstance) return
     setGameVersions([targetInstance.minecraftVersion])
@@ -138,7 +138,7 @@ export function DiscoverPage(): React.JSX.Element {
     void runSearch(0, false)
   }, [runSearch])
 
-  /* Infinite scroll. */
+
   useEffect(() => {
     const node = sentinel.current
     if (!node || !result) return

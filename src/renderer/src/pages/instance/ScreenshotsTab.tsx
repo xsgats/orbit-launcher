@@ -28,7 +28,7 @@ export function ScreenshotsTab({ instance }: { instance: InstanceSummary }): Rea
       setShots(list)
       setSelected(new Set())
 
-      // Thumbnails are read on demand so a folder of hundreds stays responsive.
+
       const entries = await Promise.all(
         list.slice(0, 60).map(async (shot) => [shot.id, await api.app.readImageAsDataUrl(shot.path)] as const)
       )

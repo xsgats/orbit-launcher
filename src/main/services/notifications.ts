@@ -34,7 +34,7 @@ class NotificationCenter {
     body: string
     level?: AppNotification['level']
     action?: AppNotification['action']
-    /** Also raise a native Windows toast. */
+
     toast?: boolean
   }): AppNotification {
     const item: AppNotification = {
@@ -62,7 +62,7 @@ class NotificationCenter {
         })
         toast.show()
       } catch {
-        /* toasts are a nicety, never a failure path */
+
       }
     }
 
@@ -94,7 +94,7 @@ class NotificationCenter {
     return this.list()
   }
 
-  /** Convenience used by the download manager. */
+
   downloadFinished(title: string, body: string): void {
     if (!settings.get().notifyOnDownloadComplete) return
     this.push({ title, body, level: 'success' })

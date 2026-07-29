@@ -21,7 +21,7 @@ export class HttpError extends Error {
 export interface RequestOptions extends RequestInit {
   timeoutMs?: number
   retries?: number
-  /** Status codes that should not be retried even if >= 500. */
+
   noRetryStatuses?: number[]
 }
 
@@ -98,9 +98,9 @@ export async function getBuffer(url: string, options: RequestOptions = {}): Prom
   return Buffer.from(await response.arrayBuffer())
 }
 
-/* ------------------------------------------------------------------ */
-/* Disk-backed metadata cache                                          */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface CacheEnvelope<T> {
   fetchedAt: number
@@ -115,10 +115,10 @@ function cacheFile(key: string): string {
   return join(paths.metaCacheDir, `${safe}.json`)
 }
 
-/**
- * Fetch-through cache. Returns cached data while fresh; on a network failure
- * falls back to stale data rather than breaking the UI.
- */
+
+
+
+
 export async function cached<T>(key: string, ttlMs: number, loader: () => Promise<T>): Promise<T> {
   const now = Date.now()
 
@@ -172,7 +172,7 @@ export function invalidateCache(prefix?: string): void {
   }
 }
 
-/** Small helper for bounded parallelism over a list. */
+
 export async function mapConcurrent<T, R>(
   items: T[],
   concurrency: number,

@@ -1,4 +1,4 @@
-// Must stay first: it installs the crash reporter before anything else can throw.
+
 import { markReady } from './core/crash'
 
 import { app, BrowserWindow, dialog, Menu, nativeImage, shell, Tray } from 'electron'
@@ -17,13 +17,13 @@ import { notifications } from './services/notifications'
 import { tasks } from './services/tasks'
 import { initUpdater } from './services/updater'
 
-// Keep every install under a single, predictable folder name.
+
 app.setPath('userData', join(app.getPath('appData'), 'OrbitLauncher'))
 app.setAppUserModelId('app.orbitlauncher.desktop')
 
 registerMediaProtocolPrivileges()
 
-// Keep painting while capturing, even if another window covers Orbit.
+
 if (!app.isPackaged && process.env.ORBIT_CAPTURE) {
   app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
   app.commandLine.appendSwitch('disable-renderer-backgrounding')
@@ -59,7 +59,7 @@ function createWindow(): BrowserWindow {
       nodeIntegration: false,
       spellcheck: false,
       backgroundThrottling: false,
-      // The renderer only ever loads local assets plus remote images.
+
       webSecurity: true
     }
   })
@@ -104,7 +104,7 @@ function createWindow(): BrowserWindow {
     }
   })
 
-  // Never let the app navigate away from its own UI.
+
   window.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//i.test(url)) void shell.openExternal(url)
     return { action: 'deny' }
@@ -133,11 +133,11 @@ function createWindow(): BrowserWindow {
   return window
 }
 
-/**
- * Development-only helper: walks the main routes and writes a PNG of each one,
- * so UI changes can be reviewed without driving the app by hand.
- * Enabled by setting ORBIT_CAPTURE to an output directory.
- */
+
+
+
+
+
 async function captureRoutes(window: BrowserWindow, outDir: string): Promise<void> {
   window.webContents.on('console-message', (_event, level, message, line, source) => {
     log.info('renderer', `[${level}] ${message} (${source}:${line})`)
@@ -239,8 +239,8 @@ async function bootstrap(): Promise<void> {
   mainWindow = createWindow()
   if (settings.get().minimizeToTray) createTray()
 
-  // Warm caches without blocking first paint. None of these may take the app
-  // down if they fail — they are all best-effort.
+
+
   setTimeout(() => {
     void accounts.refreshExpiringInBackground().catch((err) =>
       log.warn('orbit', 'Background account refresh failed', err)
@@ -254,9 +254,9 @@ async function bootstrap(): Promise<void> {
   log.info('orbit', `Ready — data root ${paths.dataRoot}`)
 }
 
-/* ------------------------------------------------------------------ */
-/* Lifecycle                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 if (!app.requestSingleInstanceLock()) {
   app.quit()

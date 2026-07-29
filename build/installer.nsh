@@ -1,10 +1,10 @@
-; Orbit Launcher — installer customisations
-;
-; Keeps a user's library (instances, worlds, accounts) safe across
-; uninstall/reinstall, and offers a clean removal on request.
+
+
+
+
 
 !macro customUnInstall
-  ; Only ask when there is actually something to delete.
+
   IfFileExists "$APPDATA\OrbitLauncher\*.*" 0 skipDataPrompt
 
     MessageBox MB_YESNO|MB_ICONQUESTION \
@@ -20,7 +20,7 @@ Choose No to keep your library for a future reinstall." \
 !macroend
 
 !macro customInstall
-  ; Register the orbit:// protocol for one-click modpack links.
+
   WriteRegStr SHCTX "Software\Classes\orbit" "" "URL:Orbit Launcher"
   WriteRegStr SHCTX "Software\Classes\orbit" "URL Protocol" ""
   WriteRegStr SHCTX "Software\Classes\orbit\DefaultIcon" "" "$INSTDIR\${APP_EXECUTABLE_FILENAME},0"
@@ -28,6 +28,6 @@ Choose No to keep your library for a future reinstall." \
 !macroend
 
 !macro customUnInit
-  ; Clean up the protocol registration on the way out.
+
   DeleteRegKey SHCTX "Software\Classes\orbit"
 !macroend

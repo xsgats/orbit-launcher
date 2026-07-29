@@ -1,9 +1,9 @@
-/* ==================================================================
-   Composite patterns: surfaces, instance cards, store cards, lists,
-   the log viewer and every page-specific layout.
-   ================================================================== */
 
-/* ---- Surfaces --------------------------------------------------------- */
+
+
+
+
+
 .surface {
   border-radius: var(--r-lg);
   background: var(--surface-1);
@@ -50,7 +50,7 @@
   margin: var(--s-5) 0;
 }
 
-/* ---- Empty state -------------------------------------------------------- */
+
 .empty {
   display: flex;
   flex-direction: column;
@@ -82,7 +82,7 @@
   line-height: 1.6;
 }
 
-/* ---- Skeleton ------------------------------------------------------------ */
+
 .skeleton {
   border-radius: var(--r-md);
   background: linear-gradient(
@@ -101,7 +101,7 @@
   }
 }
 
-/* ---- Stat tile ------------------------------------------------------------- */
+
 .stat {
   display: flex;
   flex-direction: column;
@@ -151,9 +151,9 @@
   color: var(--text-tertiary);
 }
 
-/* ==================================================================
-   Instance cards
-   ================================================================== */
+
+
+
 
 .instance-grid {
   display: grid;
@@ -199,7 +199,7 @@
   box-shadow: 0 0 0 1px var(--accent-a24), var(--shadow-md);
 }
 
-/* Artwork band */
+
 .icard__art {
   position: relative;
   height: 116px;
@@ -236,7 +236,7 @@
   );
 }
 
-/* Generated fallback artwork keyed to the instance identity */
+
 .icard__art--generated {
   background:
     radial-gradient(120% 90% at 18% 12%, var(--art-a), transparent 62%),
@@ -291,7 +291,7 @@
   color: #ffc94d;
 }
 
-/* Identity row */
+
 .icard__body {
   position: relative;
   display: flex;
@@ -369,7 +369,7 @@
   white-space: nowrap;
 }
 
-/* Hover play affordance */
+
 .icard__play {
   position: absolute;
   right: var(--s-4);
@@ -404,7 +404,7 @@
   box-shadow: 0 6px 20px rgb(255 107 122 / 32%);
 }
 
-/* Status strip */
+
 .icard__status {
   position: absolute;
   inset: auto 0 0 0;
@@ -438,7 +438,7 @@
   }
 }
 
-/* ---- Instance list rows -------------------------------------------------- */
+
 .irow {
   display: grid;
   grid-template-columns: 44px minmax(0, 2.2fr) minmax(0, 1.2fr) 108px 96px 92px;
@@ -472,9 +472,9 @@
   object-fit: cover;
 }
 
-/* ==================================================================
-   Hero header (instance detail + dashboard feature)
-   ================================================================== */
+
+
+
 
 .hero {
   position: relative;
@@ -557,9 +557,9 @@
   flex-shrink: 0;
 }
 
-/* ==================================================================
-   Store
-   ================================================================== */
+
+
+
 
 .store-layout {
   display: grid;
@@ -686,7 +686,7 @@
   color: #f8895f;
 }
 
-/* Project detail */
+
 .project-hero {
   display: flex;
   gap: var(--s-5);
@@ -820,9 +820,9 @@
   margin: var(--s-5) 0;
 }
 
-/* ==================================================================
-   Content rows (mods, packs, worlds, screenshots)
-   ================================================================== */
+
+
+
 
 .crow {
   display: flex;
@@ -902,7 +902,7 @@
   opacity: 1;
 }
 
-/* ---- Screenshot grid ------------------------------------------------------ */
+
 .shot-grid {
   display: grid;
   gap: var(--s-3);
@@ -950,7 +950,7 @@
   box-shadow: 0 0 0 2px var(--accent-a40);
 }
 
-/* ---- World cards --------------------------------------------------------- */
+
 .world-grid {
   display: grid;
   gap: var(--s-3);
@@ -986,9 +986,9 @@
   color: var(--text-tertiary);
 }
 
-/* ==================================================================
-   Log viewer
-   ================================================================== */
+
+
+
 
 .logview {
   display: flex;
@@ -1091,9 +1091,9 @@
   padding: 0 1px;
 }
 
-/* ==================================================================
-   Tasks / downloads
-   ================================================================== */
+
+
+
 
 .task {
   display: flex;
@@ -1125,9 +1125,9 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ==================================================================
-   Timeline (launch history / activity)
-   ================================================================== */
+
+
+
 
 .timeline {
   display: flex;
@@ -1172,9 +1172,9 @@
   z-index: 1;
 }
 
-/* ==================================================================
-   News
-   ================================================================== */
+
+
+
 
 .news-grid {
   display: grid;
@@ -1214,9 +1214,9 @@
   flex: 1;
 }
 
-/* ==================================================================
-   Settings
-   ================================================================== */
+
+
+
 
 .settings-layout {
   display: grid;
@@ -1310,9 +1310,9 @@
   justify-content: flex-end;
 }
 
-/* ==================================================================
-   Accounts
-   ================================================================== */
+
+
+
 
 .account-card {
   position: relative;
@@ -1342,9 +1342,9 @@
   flex-shrink: 0;
 }
 
-/* ==================================================================
-   Misc
-   ================================================================== */
+
+
+
 
 .kbd {
   display: inline-grid;

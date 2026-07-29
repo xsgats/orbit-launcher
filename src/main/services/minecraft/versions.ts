@@ -73,13 +73,13 @@ export function versionJarPath(id: string): string {
   return join(versionDir(id), `${id}.jar`)
 }
 
-/** Writes a loader-generated manifest into the shared versions folder. */
+
 export async function saveVersionJson(json: VersionJson): Promise<void> {
   await ensureDir(versionDir(json.id))
   await writeJson(versionJsonPath(json.id), json)
 }
 
-/** Loads a version manifest, downloading it from Mojang when it is a vanilla id. */
+
 export async function loadVersionJson(id: string): Promise<VersionJson> {
   const local = await readJson<VersionJson>(versionJsonPath(id))
   if (local) return local
@@ -95,12 +95,12 @@ export async function loadVersionJson(id: string): Promise<VersionJson> {
 }
 
 export interface ResolvedVersion extends VersionJson {
-  /** Full inheritance chain, closest ancestor last. */
+
   chain: string[]
   javaMajor: number
 }
 
-/** Follows `inheritsFrom` until a root manifest, merging as it goes. */
+
 export async function resolveVersion(id: string, seen = new Set<string>()): Promise<ResolvedVersion> {
   if (seen.has(id)) throw new Error(`Circular version inheritance detected at "${id}"`)
   seen.add(id)
@@ -119,13 +119,13 @@ export async function resolveVersion(id: string, seen = new Set<string>()): Prom
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Libraries                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface ResolvedLibrary {
   name: string
-  /** Absolute path in the shared libraries folder. */
+
   path: string
   url: string | null
   sha1: string | null
@@ -136,7 +136,7 @@ export interface ResolvedLibrary {
 
 function libraryDownloadUrl(library: Library, relativePath: string): string | null {
   if (library.url) return `${library.url.replace(/\/$/, '')}/${relativePath}`
-  // Sane defaults for loader manifests that give neither `downloads` nor `url`.
+
   return `https://libraries.minecraft.net/${relativePath}`
 }
 
@@ -149,7 +149,7 @@ export function resolveLibraries(version: VersionJson): ResolvedLibrary[] {
 
     const classifier = nativesClassifier(library)
 
-    // Plain artifact (skip when the library is natives-only).
+
     const hasArtifact = library.downloads?.artifact || !library.natives
     if (hasArtifact) {
       const artifact = library.downloads?.artifact
@@ -191,7 +191,7 @@ export function resolveLibraries(version: VersionJson): ResolvedLibrary[] {
   return out
 }
 
-/** Classpath entries, newest declaration of each group:artifact winning. */
+
 export function buildClasspath(version: VersionJson, clientJar: string): string[] {
   const libraries = resolveLibraries(version).filter((l) => !l.isNative)
   const byKey = new Map<string, string>()
@@ -199,9 +199,9 @@ export function buildClasspath(version: VersionJson, clientJar: string): string[
   return [...byKey.values(), clientJar]
 }
 
-/* ------------------------------------------------------------------ */
-/* Installation                                                        */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface InstallOptions {
   task?: TaskHandle
@@ -239,7 +239,7 @@ async function installAssets(version: VersionJson, options: InstallOptions): Pro
 
   await downloadAll(specs, { task, signal: options.signal, verify: false })
 
-  // Pre-1.7 versions read assets from a flat "virtual" tree instead of the hashed store.
+
   if (index.virtual || index.map_to_resources) {
     const virtualRoot = join(paths.assetsDir, 'virtual', version.assetIndex.id)
     task?.setDetail('Preparing legacy assets…')
@@ -252,7 +252,7 @@ async function installAssets(version: VersionJson, options: InstallOptions): Pro
   }
 }
 
-/** Extracts every native jar for this version into a per-version natives folder. */
+
 export async function extractNatives(version: VersionJson, targetDir: string): Promise<void> {
   const natives = resolveLibraries(version).filter((l) => l.isNative)
   if (!natives.length) return
@@ -266,13 +266,13 @@ export async function extractNatives(version: VersionJson, targetDir: string): P
       filter: (name) => {
         if (name.endsWith('/')) return false
         if (native.extractExclude.some((prefix) => name.startsWith(prefix))) return false
-        // Only platform binaries and their sidecars are useful at runtime.
+
         return true
       }
     })
   }
 
-  // Some packages nest binaries a level deep; hoist them so java.library.path works.
+
   const entries = await readdir(targetDir, { withFileTypes: true }).catch(() => [])
   for (const entry of entries) {
     if (!entry.isDirectory()) continue
@@ -289,17 +289,17 @@ export function nativesDirFor(versionId: string): string {
   return join(paths.nativesDir, versionId)
 }
 
-/**
- * Ensures the client jar, every library, natives, assets and the log4j config
- * for a resolved version are on disk.
- */
+
+
+
+
 export async function installVersion(versionId: string, options: InstallOptions = {}): Promise<ResolvedVersion> {
   const { task } = options
   task?.setDetail('Resolving version metadata…')
 
   const version = await resolveVersion(versionId)
 
-  // 1. Client jar — download from the root of the inheritance chain.
+
   const rootId = version.chain[0]
   const clientJar = versionJarPath(rootId)
   const clientDownload = version.downloads?.client
@@ -313,7 +313,7 @@ export async function installVersion(versionId: string, options: InstallOptions 
     throw new Error(`Version "${rootId}" does not publish a client download.`)
   }
 
-  // 2. Libraries.
+
   task?.setDetail('Downloading libraries…')
   const libraries = resolveLibraries(version)
   await downloadAll(
@@ -328,11 +328,11 @@ export async function installVersion(versionId: string, options: InstallOptions 
     { task: task?.slice(0.12, 0.42), signal: options.signal }
   )
 
-  // 3. Natives.
+
   task?.setDetail('Extracting natives…')
   await extractNatives(version, nativesDirFor(version.id))
 
-  // 4. Log4j2 configuration — gives us structured, parseable game logs.
+
   if (version.logging?.client?.file) {
     const file = version.logging.client.file
     await downloadFile(
@@ -346,7 +346,7 @@ export async function installVersion(versionId: string, options: InstallOptions 
     ).catch((err) => log.warn('versions', 'Could not fetch the log4j config', err))
   }
 
-  // 5. Assets.
+
   await installAssets(version, { task: task?.slice(0.45, 1), signal: options.signal })
 
   task?.setProgress(1)
@@ -359,7 +359,7 @@ export function loggingConfigPath(version: VersionJson): string | null {
   return file ? join(paths.assetsDir, 'log_configs', file.id) : null
 }
 
-/** Assets root the game should read from, honouring legacy layouts. */
+
 export function assetsRootFor(version: VersionJson): { dir: string; index: string; legacy: boolean } {
   const index = version.assetIndex?.id ?? version.assets ?? 'legacy'
   const legacy = index === 'legacy' || index === 'pre-1.6'

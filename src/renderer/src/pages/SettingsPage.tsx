@@ -75,7 +75,7 @@ export function SettingsPage({ section }: { section: string }): React.JSX.Elemen
     void api.app.getSystemInfo().then(setSystem)
   }, [])
 
-  /* Deep links (`/settings/updates`) scroll the matching section into view. */
+
   useEffect(() => {
     const target = SECTIONS.find((entry) => entry.id === section)
     if (!target) return
@@ -88,7 +88,7 @@ export function SettingsPage({ section }: { section: string }): React.JSX.Elemen
     }
   }, [section])
 
-  /* Highlight whichever section is under the top of the viewport. */
+
   useEffect(() => {
     const page = containerRef.current?.closest('.page')
     if (!page) return
@@ -153,9 +153,9 @@ export function SettingsPage({ section }: { section: string }): React.JSX.Elemen
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Building blocks                                                    */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function Section({
   id,
@@ -204,9 +204,9 @@ interface SectionProps {
   patch: (changes: Partial<AppSettings>) => void
 }
 
-/* ------------------------------------------------------------------ */
-/* Appearance                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function AppearanceSection({ settings, patch }: SectionProps): React.JSX.Element {
   const [custom, setCustom] = useState(settings.accentColor)
@@ -316,9 +316,9 @@ function AppearanceSection({ settings, patch }: SectionProps): React.JSX.Element
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Launch                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function LaunchSection({ settings, patch }: SectionProps): React.JSX.Element {
   return (
@@ -379,9 +379,9 @@ function LaunchSection({ settings, patch }: SectionProps): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Downloads                                                          */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function DownloadsSection({
   settings,
@@ -432,9 +432,9 @@ function DownloadsSection({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Integrations                                                       */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function IntegrationsSection({ settings, patch }: SectionProps): React.JSX.Element {
   const [key, setKey] = useState(settings.curseforgeApiKey)
@@ -543,9 +543,9 @@ function IntegrationsSection({ settings, patch }: SectionProps): React.JSX.Eleme
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Notifications                                                      */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function NotificationsSection({ settings, patch }: SectionProps): React.JSX.Element {
   return (
@@ -593,9 +593,9 @@ function NotificationsSection({ settings, patch }: SectionProps): React.JSX.Elem
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Updates                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function UpdatesSection(): React.JSX.Element {
   const settings = useOrbit((state) => state.settings)!
@@ -709,9 +709,9 @@ function UpdatesSection(): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Folders                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function FoldersSection({ settings, patch }: SectionProps): React.JSX.Element {
   const [confirmReset, setConfirmReset] = useState(false)
@@ -812,9 +812,9 @@ function FoldersSection({ settings, patch }: SectionProps): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* About                                                              */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function AboutSection({ system }: { system: SystemInfo | null }): React.JSX.Element {
   return (

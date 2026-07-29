@@ -2,15 +2,15 @@ import { app } from 'electron'
 import { join } from 'node:path'
 import { mkdirSync } from 'node:fs'
 
-/**
- * All on-disk locations Orbit uses. `dataRoot` is user-configurable; everything
- * else is derived from it so a single setting moves the whole library.
- */
+
+
+
+
 class Paths {
   private root: string
 
   constructor() {
-    // ORBIT_DATA_ROOT supports portable installs and side-by-side test libraries.
+
     this.root = process.env.ORBIT_DATA_ROOT?.trim() || join(app.getPath('appData'), 'OrbitLauncher')
   }
 
@@ -23,7 +23,7 @@ class Paths {
     return this.root
   }
 
-  /** Never moves — holds settings, accounts and other launcher-level state. */
+
   get configRoot(): string {
     return app.getPath('userData')
   }
@@ -112,7 +112,7 @@ class Paths {
     return join(this.instancesDir, folder)
   }
 
-  /** Orbit's private metadata folder inside an instance. */
+
   instanceMetaDir(folder: string): string {
     return join(this.instanceDir(folder), '.orbit')
   }
@@ -121,7 +121,7 @@ class Paths {
     return join(this.instanceMetaDir(folder), 'instance.json')
   }
 
-  /** The `.minecraft`-equivalent game directory for an instance. */
+
   instanceGameDir(folder: string): string {
     return join(this.instanceDir(folder), 'minecraft')
   }
@@ -153,7 +153,7 @@ class Paths {
       try {
         mkdirSync(dir, { recursive: true })
       } catch {
-        /* best effort — surfaced later by whatever tries to write */
+
       }
     }
   }

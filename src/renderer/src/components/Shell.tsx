@@ -30,9 +30,9 @@ import { IconButton, ProgressRing, Tooltip, useAnchoredMenu } from './ui'
 import { NotificationPanel } from './NotificationPanel'
 import { AccountSwitcher } from './AccountSwitcher'
 
-/* ------------------------------------------------------------------ */
-/* Ambient background                                                 */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Ambient(): React.JSX.Element {
   return (
@@ -43,9 +43,9 @@ export function Ambient(): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Title bar                                                          */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function TitleBar({ onOpenSearch }: { onOpenSearch: () => void }): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
@@ -154,9 +154,9 @@ export function TitleBar({ onOpenSearch }: { onOpenSearch: () => void }): React.
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Sidebar                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface NavEntry {
   to: string
@@ -288,9 +288,9 @@ export function Sidebar(): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Toasts                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 const TOAST_ICONS = {
   info: <Info size={16} />,
@@ -332,9 +332,9 @@ export function ToastHost(): React.JSX.Element {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Command palette                                                    */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface Command {
   id: string

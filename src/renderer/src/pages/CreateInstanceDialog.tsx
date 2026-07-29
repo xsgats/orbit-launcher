@@ -42,7 +42,7 @@ export function CreateInstanceDialog({
   const [installNow, setInstallNow] = useState(true)
   const [busy, setBusy] = useState(false)
 
-  /* Reset each time the dialog opens. */
+
   useEffect(() => {
     if (!open) return
     setName('')
@@ -57,7 +57,7 @@ export function CreateInstanceDialog({
     setMinecraftVersion(latest?.id ?? versions[0]?.id ?? '')
   }, [open, versions])
 
-  /* Which Minecraft versions does this loader support? */
+
   useEffect(() => {
     if (!open || loader === 'vanilla') {
       setSupported(null)
@@ -74,7 +74,7 @@ export function CreateInstanceDialog({
     }
   }, [open, loader])
 
-  /* Loader builds for the chosen Minecraft version. */
+
   useEffect(() => {
     if (!open || loader === 'vanilla' || !minecraftVersion) {
       setLoaderVersions(null)
@@ -176,7 +176,7 @@ export function CreateInstanceDialog({
       }
     >
       <div className="col gap-5" style={{ paddingBottom: 8 }}>
-        {/* Identity */}
+        { }
         <div className="row gap-4" style={{ alignItems: 'flex-end' }}>
           <div
             style={{
@@ -232,7 +232,7 @@ export function CreateInstanceDialog({
           </div>
         </div>
 
-        {/* Loader */}
+        { }
         <div>
           <div className="filter-group__title">Mod loader</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(128px, 1fr))', gap: 8 }}>
@@ -267,7 +267,7 @@ export function CreateInstanceDialog({
           </p>
         </div>
 
-        {/* Version picker */}
+        { }
         <div>
           <div className="row between gap-3" style={{ marginBottom: 10 }}>
             <div className="filter-group__title" style={{ margin: 0 }}>
@@ -343,7 +343,7 @@ export function CreateInstanceDialog({
           </div>
         </div>
 
-        {/* Loader build */}
+        { }
         <AnimatePresence initial={false}>
           {loader !== 'vanilla' && (
             <motion.div

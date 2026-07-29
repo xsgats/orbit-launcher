@@ -13,9 +13,9 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ChevronDown, Search, X } from 'lucide-react'
 
-/* ------------------------------------------------------------------ */
-/* Button                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -91,9 +91,9 @@ export function IconButton({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Text field                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function TextField({
   label,
@@ -190,9 +190,9 @@ export function SearchInput({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Select                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface SelectOption {
   value: string
@@ -254,9 +254,9 @@ export function Select({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Switch / checkbox / slider                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Switch({
   checked,
@@ -360,9 +360,9 @@ export function Slider({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Segmented control                                                  */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Segmented<T extends string>({
   value,
@@ -404,9 +404,9 @@ export function Segmented<T extends string>({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Tabs                                                               */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Tabs<T extends string>({
   value,
@@ -447,9 +447,9 @@ export function Tabs<T extends string>({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Chip                                                               */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Chip({
   children,
@@ -493,9 +493,9 @@ export function Chip({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Progress                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Progress({ value, className = '' }: { value: number; className?: string }): React.JSX.Element {
   const indeterminate = value < 0
@@ -547,9 +547,9 @@ export function ProgressRing({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Tooltip                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Tooltip({
   content,
@@ -628,9 +628,9 @@ export function Tooltip({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Dialog                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Dialog({
   open,
@@ -772,9 +772,9 @@ export function ConfirmDialog({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Context menu                                                       */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface MenuItemSpec {
   label: string
@@ -886,7 +886,7 @@ export function useContextMenu(): (event: React.MouseEvent, items: MenuItemSpec[
   )
 }
 
-/** Opens a menu anchored under a button rather than at the pointer. */
+
 export function useAnchoredMenu(): (element: HTMLElement, items: MenuItemSpec[]) => void {
   const setState = useContext(MenuContext)
   return useCallback(
@@ -898,9 +898,9 @@ export function useAnchoredMenu(): (element: HTMLElement, items: MenuItemSpec[])
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Empty state & skeleton                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function EmptyState({
   icon,
@@ -937,9 +937,9 @@ export function Skeleton({
   return <div className="skeleton" style={{ width, height, borderRadius: radius }} />
 }
 
-/* ------------------------------------------------------------------ */
-/* Callout                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Callout({
   tone = 'default',
@@ -958,9 +958,9 @@ export function Callout({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Lightbox                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }): React.JSX.Element {
   useEffect(() => {

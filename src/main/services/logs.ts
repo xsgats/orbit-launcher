@@ -15,10 +15,10 @@ function normalizeLevel(raw: string): LogLevel {
   return 'info'
 }
 
-/**
- * Incremental parser for Mojang's log4j XML output, falling back to plain text
- * for anything the game writes outside an event (mod loaders, JVM warnings…).
- */
+
+
+
+
 class LogParser {
   private buffer = ''
   private seq = 0
@@ -31,7 +31,7 @@ class LogParser {
       const start = this.buffer.indexOf('<log4j:Event')
       if (start === -1) break
 
-      // Anything before the event is raw output.
+
       if (start > 0) {
         lines.push(...this.emitPlain(this.buffer.slice(0, start), fallbackLevel))
         this.buffer = this.buffer.slice(start)
@@ -47,7 +47,7 @@ class LogParser {
       if (parsed) lines.push(parsed)
     }
 
-    // Flush complete plain-text lines so output is not held hostage by a partial event.
+
     if (!this.buffer.includes('<log4j:Event')) {
       const lastNewline = this.buffer.lastIndexOf('\n')
       if (lastNewline !== -1) {
@@ -113,16 +113,16 @@ function decodeXmlEntities(text: string): string {
     .replace(/&amp;/g, '&')
 }
 
-/* ------------------------------------------------------------------ */
-/* Per-instance buffers                                                */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface Session {
   lines: LogLine[]
   parser: LogParser
   pending: LogLine[]
   timer: NodeJS.Timeout | null
-  /** Monotonic counter for launcher-authored lines, kept out of the parser's range. */
+
   noteSeq: number
 }
 
@@ -138,7 +138,7 @@ class LogStore {
     return session
   }
 
-  /** Starts a fresh buffer for a new game session. */
+
   begin(instanceId: string): void {
     const session = this.session(instanceId)
     session.lines = []
@@ -153,7 +153,7 @@ class LogStore {
     if (parsed.length) this.append(instanceId, parsed)
   }
 
-  /** Launcher-authored lines (command line, exit codes, hints). */
+
   note(instanceId: string, message: string, level: LogLevel = 'launcher'): void {
     const session = this.session(instanceId)
     this.append(instanceId, [
@@ -206,9 +206,9 @@ class LogStore {
 
 export const logStore = new LogStore()
 
-/* ------------------------------------------------------------------ */
-/* Crash reports                                                       */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function summarizeCrash(text: string): string {
   const description = /Description:\s*(.+)/.exec(text)?.[1]?.trim()
@@ -233,7 +233,7 @@ export async function listCrashReports(instanceId: string, gameDir: string): Pro
       const head = (await readFile(full, 'utf8')).slice(0, 8_000)
       summary = summarizeCrash(head)
     } catch {
-      /* keep the default summary */
+
     }
 
     reports.push({
@@ -251,7 +251,7 @@ export async function listCrashReports(instanceId: string, gameDir: string): Pro
   return reports.sort((a, b) => b.createdAt - a.createdAt)
 }
 
-/** Finds a crash report written after the given time, used on abnormal exit. */
+
 export async function findCrashReportSince(gameDir: string, since: number): Promise<string | null> {
   const dir = join(gameDir, 'crash-reports')
   if (!(await exists(dir))) return null

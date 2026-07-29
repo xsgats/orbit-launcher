@@ -43,8 +43,8 @@ export async function initUpdater(): Promise<void> {
   }
 
   try {
-    // electron-updater is CommonJS; under a CJS bundle the named export is only
-    // reachable through the interop default.
+
+
     const imported = (await import('electron-updater')) as ElectronUpdater & { default?: ElectronUpdater }
     autoUpdater = imported.autoUpdater ?? imported.default?.autoUpdater ?? null
   } catch (err) {
@@ -104,7 +104,7 @@ export async function initUpdater(): Promise<void> {
 
   if (config.autoCheckUpdates) {
     setTimeout(() => void check(), 8_000)
-    // Re-check every six hours for long-running sessions.
+
     checkTimer = setInterval(() => void check(), 6 * 60 * 60 * 1000)
     checkTimer.unref?.()
   }

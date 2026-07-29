@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import type { OrbitApi, OrbitEventName, OrbitEvents } from '../shared/api'
 
-/** Builds `{ method: (...args) => invoke('domain:method', ...args) }`. */
+
 function group(domain: string, methods: readonly string[]): Record<string, unknown> {
   const out: Record<string, unknown> = {}
   for (const method of methods) {

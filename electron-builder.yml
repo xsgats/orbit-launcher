@@ -6,9 +6,9 @@ directories:
   buildResources: build
   output: release/${version}
 
-# Keep this list conservative. Pruning inside node_modules is not worth the
-# risk: an over-eager glob silently removed archiver's dependency tree once and
-# the app failed to start with no usable error.
+
+
+
 files:
   - out/**/*
   - package.json
@@ -28,7 +28,7 @@ win:
     - target: nsis
       arch: [x64]
   artifactName: OrbitLauncher-Setup-${version}.${ext}
-  # Windows shows this in the UAC prompt and file properties.
+
   legalTrademarks: Not affiliated with Mojang Studios or Microsoft
   fileAssociations:
     - ext: orbitpack
@@ -46,7 +46,7 @@ win:
       schemes: [orbit]
 
 nsis:
-  # Per-user by default so no admin prompt is needed, with a machine-wide option.
+
   oneClick: false
   perMachine: false
   allowElevation: true
@@ -64,8 +64,8 @@ nsis:
   displayLanguageSelector: false
   include: build/installer.nsh
 
-# Auto-update feed. Point `url` at wherever the release artefacts are hosted;
-# electron-updater reads latest.yml from the same location.
+
+
 publish:
   - provider: generic
     url: https://releases.orbitlauncher.app/win32-x64

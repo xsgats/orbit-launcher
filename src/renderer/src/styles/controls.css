@@ -1,8 +1,8 @@
-/* ==================================================================
-   Controls: buttons, fields, toggles, tabs, menus, dialogs, toasts
-   ================================================================== */
 
-/* ---- Button -------------------------------------------------------- */
+
+
+
+
 .btn {
   position: relative;
   display: inline-flex;
@@ -105,7 +105,7 @@
   width: 44px;
 }
 
-/* Loading state */
+
 .btn[data-loading='true'] {
   color: transparent !important;
   pointer-events: none;
@@ -133,7 +133,7 @@
   }
 }
 
-/* ---- Icon button --------------------------------------------------- */
+
 .iconbtn {
   display: grid;
   place-items: center;
@@ -171,7 +171,7 @@
   color: var(--danger);
 }
 
-/* ---- Fields --------------------------------------------------------- */
+
 .field {
   display: flex;
   flex-direction: column;
@@ -260,7 +260,7 @@
   border-color: var(--danger);
 }
 
-/* ---- Select --------------------------------------------------------- */
+
 .select {
   position: relative;
   display: flex;
@@ -314,7 +314,7 @@
   padding-right: var(--s-6);
 }
 
-/* ---- Switch ---------------------------------------------------------- */
+
 .switch {
   position: relative;
   width: 40px;
@@ -378,7 +378,7 @@
   margin-top: 2px;
 }
 
-/* ---- Checkbox --------------------------------------------------------- */
+
 .checkbox {
   display: grid;
   place-items: center;
@@ -417,7 +417,7 @@
   background: var(--surface-1);
 }
 
-/* ---- Slider ------------------------------------------------------------ */
+
 .slider {
   --pct: 50%;
   appearance: none;
@@ -451,7 +451,7 @@
   transform: scale(1.04);
 }
 
-/* ---- Segmented control -------------------------------------------------- */
+
 .segmented {
   position: relative;
   display: inline-flex;
@@ -497,7 +497,7 @@
   z-index: 0;
 }
 
-/* ---- Tabs ---------------------------------------------------------------- */
+
 .tabs {
   position: relative;
   display: flex;
@@ -555,7 +555,7 @@
   background: linear-gradient(90deg, var(--accent), var(--cyan));
 }
 
-/* ---- Chips / badges --------------------------------------------------------- */
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -615,7 +615,7 @@
   flex-shrink: 0;
 }
 
-/* Loader identity */
+
 .chip--loader[data-loader='vanilla'] {
   color: var(--loader-vanilla);
 }
@@ -632,7 +632,7 @@
   color: var(--loader-neoforge);
 }
 
-/* ---- Progress -------------------------------------------------------------- */
+
 .progress {
   position: relative;
   height: 5px;
@@ -677,7 +677,7 @@
   transition: stroke-dashoffset var(--d-base) var(--ease-out);
 }
 
-/* ---- Dialog ---------------------------------------------------------------- */
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -744,7 +744,7 @@
   background: var(--surface-1);
 }
 
-/* ---- Drawer ----------------------------------------------------------------- */
+
 .drawer {
   position: fixed;
   top: var(--titlebar-h);
@@ -767,7 +767,7 @@
   backdrop-filter: blur(3px);
 }
 
-/* ---- Menu -------------------------------------------------------------------- */
+
 .menu {
   position: fixed;
   z-index: 220;
@@ -828,7 +828,7 @@
   color: var(--text-tertiary);
 }
 
-/* ---- Tooltip -------------------------------------------------------------------- */
+
 .tooltip {
   position: fixed;
   z-index: 240;
@@ -844,7 +844,7 @@
   max-width: 280px;
 }
 
-/* ---- Toast ---------------------------------------------------------------------- */
+
 .toasts {
   position: fixed;
   right: var(--s-5);

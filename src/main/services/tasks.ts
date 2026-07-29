@@ -15,21 +15,21 @@ export interface TaskHandle {
   readonly signal: AbortSignal
   setTitle(title: string): void
   setDetail(detail: string): void
-  /** `progress` is 0..1, or -1 for indeterminate. */
+
   setProgress(progress: number, bytesDone?: number, bytesTotal?: number): void
   addBytes(delta: number): void
   succeed(detail?: string): void
   fail(error: unknown): void
   cancel(): void
   throwIfCancelled(): void
-  /** Runs `fn` as a slice of this task's progress bar, e.g. 0.2 -> 0.6. */
+
   slice(from: number, to: number): TaskHandle
 }
 
 interface TaskRecord {
   info: TaskInfo
   controller: AbortController
-  /** Bytes seen at the last speed sample. */
+
   lastSampleBytes: number
   lastSampleAt: number
 }
@@ -142,7 +142,7 @@ class TaskManager {
     if (elapsed >= 500) {
       const delta = bytesDone - record.lastSampleBytes
       const instant = (delta / elapsed) * 1000
-      // Exponential smoothing keeps the readout from flickering.
+
       record.info.speed = record.info.speed ? record.info.speed * 0.6 + instant * 0.4 : instant
       record.lastSampleBytes = bytesDone
       record.lastSampleAt = now
@@ -213,7 +213,7 @@ class TaskManager {
     emit('tasks:changed', this.list())
   }
 
-  /** Wraps an async unit of work in a task with automatic success/failure reporting. */
+
   async run<T>(
     options: Parameters<TaskManager['create']>[0],
     fn: (task: TaskHandle) => Promise<T>

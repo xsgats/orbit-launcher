@@ -1,4 +1,4 @@
-/* Small, reusable animations shared across the app. */
+
 
 @keyframes orbit-float {
   from {
@@ -24,7 +24,7 @@
   animation: spin 0.9s linear infinite;
 }
 
-/* Boot splash ------------------------------------------------------- */
+
 .boot {
   position: fixed;
   inset: 0;
@@ -68,12 +68,12 @@
   animation: indeterminate 1.3s var(--ease-in-out) infinite;
 }
 
-/* Page transitions --------------------------------------------------- */
+
 .page-enter {
   animation: fade-up 0.28s var(--ease-out);
 }
 
-/* Staggered list reveal ---------------------------------------------- */
+
 .stagger > * {
   animation: fade-up 0.34s var(--ease-out) backwards;
 }

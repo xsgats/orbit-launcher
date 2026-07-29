@@ -527,9 +527,9 @@ function isCompatible(version: StoreVersion, instance: InstanceSummary): boolean
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Body rendering                                                     */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function escapeHtml(value: string): string {
   return value
@@ -539,10 +539,10 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
-/**
- * Modrinth bodies are Markdown, CurseForge bodies are already HTML.
- * Both are rendered into a sandboxed subset — no scripts, no inline handlers.
- */
+
+
+
+
 function renderBody(project: StoreProjectDetail): string {
   if (project.provider === 'curseforge') return sanitizeHtml(project.bodyHtml)
   return renderMarkdown(project.bodyHtml)
@@ -565,7 +565,7 @@ function renderMarkdown(markdown: string): string {
     return ` BLOCK${blocks.length - 1} `
   })
 
-  // Preserve the HTML authors legitimately embed (badges, centred images).
+
   const rawHtml: string[] = []
   text = text.replace(/<(img|br|hr|p|div|center|a|h[1-6]|table|tbody|tr|td|th|ul|ol|li|strong|em|b|i)[\s\S]*?>/gi, (match) => {
     rawHtml.push(sanitizeHtml(match))

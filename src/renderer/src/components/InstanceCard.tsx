@@ -7,9 +7,9 @@ import { api, useOrbit } from '../state/store'
 import { Logo } from './Logo'
 import { Progress, Tooltip } from './ui'
 
-/* ------------------------------------------------------------------ */
-/* Icons                                                              */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export const PRESET_ICON_GLYPHS: Record<string, string> = {
   orbit: '',
@@ -32,7 +32,7 @@ export const PRESET_ICON_GLYPHS: Record<string, string> = {
 
 export const PRESET_ICON_KEYS = Object.keys(PRESET_ICON_GLYPHS)
 
-/** Resolves an instance's custom icon URL, falling back to the preset glyph. */
+
 export function useInstanceImages(instance: InstanceSummary): {
   iconUrl: string | null
   backgroundUrl: string | null
@@ -96,9 +96,9 @@ export function InstanceIcon({
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Status                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 const STATUS_LABEL: Record<InstanceStatus, string> = {
   idle: 'Ready',
@@ -121,9 +121,9 @@ export function isBusy(status: InstanceStatus): boolean {
   return BUSY.includes(status)
 }
 
-/* ------------------------------------------------------------------ */
-/* Card                                                               */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export function InstanceCard({
   instance,

@@ -32,7 +32,7 @@ import type {
   ContentProvider
 } from './types'
 
-/** Payloads pushed from main -> renderer. */
+
 export interface OrbitEvents {
   'tasks:changed': TaskInfo[]
   'instance:status': { instanceId: string; status: InstanceStatus; detail?: string }
@@ -73,7 +73,7 @@ export interface InstallVersionRequest {
   projectId: string
   versionId: string
   kind: ContentKind
-  /** Also fetch and install required dependencies. */
+
   withDependencies: boolean
 }
 

@@ -14,9 +14,9 @@ import type {
 
 const api = window.orbit
 
-/* ------------------------------------------------------------------ */
-/* Toasts                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface Toast {
   id: string
@@ -43,7 +43,7 @@ export const useToasts = create<ToastState>((set, get) => ({
   dismiss: (id) => set({ toasts: get().toasts.filter((toast) => toast.id !== id) })
 }))
 
-/** Shared error reporter so every page fails the same way. */
+
 export function reportError(scope: string, error: unknown): void {
   const message = error instanceof Error ? error.message : String(error)
   console.error(`[${scope}]`, error)
@@ -54,9 +54,9 @@ export function toast(title: string, body?: string, level: Toast['level'] = 'suc
   useToasts.getState().push({ title, body, level })
 }
 
-/* ------------------------------------------------------------------ */
-/* Main application store                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface OrbitState {
   ready: boolean
@@ -122,7 +122,7 @@ export const useOrbit = create<OrbitState>((set, get) => ({
 
     applyTheme(settings)
 
-    // Non-blocking secondary data.
+
     void get().refreshVersions()
     void get().refreshJava()
   },
@@ -165,9 +165,9 @@ export const useOrbit = create<OrbitState>((set, get) => ({
   }
 }))
 
-/* ------------------------------------------------------------------ */
-/* Theme application                                                  */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function shift(hex: string, amount: number): string {
   const value = hex.replace('#', '')
@@ -187,7 +187,7 @@ function rgba(hex: string, alpha: number): string {
   return `rgb(${(num >> 16) & 255} ${(num >> 8) & 255} ${num & 255} / ${alpha}%)`
 }
 
-/** Relative luminance, used to pick readable text on the accent. */
+
 function luminance(hex: string): number {
   const value = hex.replace('#', '')
   const full = value.length === 3 ? value.split('').map((c) => c + c).join('') : value
@@ -219,9 +219,9 @@ export function applyTheme(settings: AppSettings): void {
   root.style.fontSize = `${Math.round(16 * Math.min(1.3, Math.max(0.85, settings.uiScale)))}px`
 }
 
-/* ------------------------------------------------------------------ */
-/* Event wiring                                                       */
-/* ------------------------------------------------------------------ */
+
+
+
 
 let wired = false
 
@@ -262,15 +262,15 @@ export function wireEvents(): void {
   api.on('updater:state', (updateState) => useOrbit.setState({ updateState }))
 }
 
-/* ------------------------------------------------------------------ */
-/* Selectors                                                          */
-/* ------------------------------------------------------------------ */
 
-/**
- * Selectors must return a stable reference: `useSyncExternalStore` compares the
- * snapshot on every render, so filtering inside the selector would allocate a
- * new array each time and loop forever. Filter in `useMemo` instead.
- */
+
+
+
+
+
+
+
+
 export function useActiveTasks(): TaskInfo[] {
   const tasks = useOrbit((state) => state.tasks)
   return useMemo(

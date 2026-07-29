@@ -57,12 +57,12 @@
     </filter>
   </defs>
 
-  <!-- Tile -->
+
   <rect x="0" y="0" width="512" height="512" rx="114" fill="url(#tile)"/>
   <rect x="0" y="0" width="512" height="512" rx="114" fill="url(#tileGlow)"/>
   <rect x="1.5" y="1.5" width="509" height="509" rx="112.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="3"/>
 
-  <!-- Starfield -->
+
   <g fill="#FFFFFF">
     <circle cx="96" cy="112" r="3.2" opacity="0.5"/>
     <circle cx="424" cy="150" r="2.4" opacity="0.36"/>
@@ -72,13 +72,13 @@
     <circle cx="86" cy="268" r="1.8" opacity="0.2"/>
   </g>
 
-  <!-- Orbit: back half -->
+
   <g transform="rotate(-28 256 256)">
     <path d="M 60 256 A 196 92 0 0 1 452 256"
           fill="none" stroke="url(#ringBack)" stroke-width="24" stroke-linecap="round"/>
   </g>
 
-  <!-- Core -->
+
   <g filter="url(#softGlow)">
     <circle cx="256" cy="256" r="84" fill="url(#core)"/>
   </g>
@@ -87,11 +87,11 @@
   <circle cx="256" cy="256" r="83" fill="none" stroke="#C7D6FF" stroke-opacity="0.28" stroke-width="2"/>
   <path d="M 197 315 a 84 84 0 0 0 118 -118" fill="none" stroke="#7CE9FF" stroke-opacity="0.5" stroke-width="4" stroke-linecap="round"/>
 
-  <!-- Orbit: front half -->
+
   <g transform="rotate(-28 256 256)">
     <path d="M 452 256 A 196 92 0 0 1 60 256"
           fill="none" stroke="url(#ringFront)" stroke-width="24" stroke-linecap="round"/>
-    <!-- Satellite riding the front arc -->
+
     <circle cx="130" cy="326" r="42" fill="url(#satGlow)"/>
     <circle cx="130" cy="326" r="17" fill="#D9FBFF"/>
     <circle cx="130" cy="326" r="17" fill="none" stroke="#35E0F0" stroke-width="3" stroke-opacity="0.8"/>

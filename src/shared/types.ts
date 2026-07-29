@@ -1,11 +1,11 @@
-/**
- * Shared domain model for Orbit Launcher.
- * These types are the contract between the main process and the renderer.
- */
 
-/* ------------------------------------------------------------------ */
-/* Loaders & versions                                                  */
-/* ------------------------------------------------------------------ */
+
+
+
+
+
+
+
 
 export type LoaderType = 'vanilla' | 'fabric' | 'quilt' | 'forge' | 'neoforge'
 
@@ -24,22 +24,22 @@ export interface MinecraftVersionSummary {
   type: MinecraftVersionType
   releaseTime: string
   url: string
-  /** Java major version required by Mojang's own metadata, when known. */
+
   javaMajor?: number
 }
 
 export interface LoaderVersion {
   id: string
-  /** Marks the maintainer-recommended build. */
+
   stable: boolean
   recommended?: boolean
   latest?: boolean
   releaseTime?: string
 }
 
-/* ------------------------------------------------------------------ */
-/* Accounts                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface SkinInfo {
   id: string
@@ -56,20 +56,20 @@ export interface CapeInfo {
 }
 
 export interface Account {
-  /** Minecraft profile UUID (dashless). */
+
   id: string
   username: string
   uuid: string
   xuid: string | null
-  /** Orbit only supports genuine Microsoft/Mojang accounts. */
+
   type: 'microsoft'
   addedAt: number
-  /** Epoch ms at which the Minecraft access token expires. */
+
   expiresAt: number
   lastRefreshed: number
   skins: SkinInfo[]
   capes: CapeInfo[]
-  /** Set when a silent refresh failed and the user must sign in again. */
+
   needsReauth?: boolean
   ownsMinecraft: boolean
 }
@@ -89,19 +89,19 @@ export interface AuthProgress {
   detail?: string
 }
 
-/* ------------------------------------------------------------------ */
-/* Java                                                                */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface JavaRuntime {
   id: string
-  /** Absolute path to javaw.exe / java.exe */
+
   path: string
   version: string
   majorVersion: number
   vendor: string
   arch: string
-  /** True when Orbit downloaded and owns this runtime. */
+
   managed: boolean
   label: string
 }
@@ -113,9 +113,9 @@ export interface JavaDownloadOption {
   installed: boolean
 }
 
-/* ------------------------------------------------------------------ */
-/* Instances                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export type InstanceIcon =
   | { type: 'preset'; key: string }
@@ -123,7 +123,7 @@ export type InstanceIcon =
   | { type: 'url'; url: string }
 
 export interface InstanceSettings {
-  /** `null` means "inherit the global default". */
+
   memoryMinMb: number | null
   memoryMaxMb: number | null
   javaRuntimeId: string | null
@@ -196,28 +196,28 @@ export interface ModpackOrigin {
   projectName: string
   versionId: string
   versionName: string
-  /** Set when a newer modpack version is available. */
+
   updateAvailable?: { versionId: string; versionName: string } | null
 }
 
 export interface Instance {
   id: string
   name: string
-  /** Folder name inside the instances root. */
+
   folder: string
   group: string | null
   tags: string[]
   favorite: boolean
   notes: string
   icon: InstanceIcon
-  /** File name of a background image stored in the instance's `.orbit` folder. */
+
   background: string | null
   accent: string | null
   minecraftVersion: string
   minecraftVersionType: MinecraftVersionType
   loader: LoaderType
   loaderVersion: string | null
-  /** The resolved version id that will actually be launched. */
+
   resolvedVersionId: string | null
   createdAt: number
   updatedAt: number
@@ -226,7 +226,7 @@ export interface Instance {
   launchCount: number
   settings: InstanceSettings
   modpack: ModpackOrigin | null
-  /** True once assets/libraries/loader have been fully installed. */
+
   installed: boolean
   history: LaunchRecord[]
 }
@@ -245,21 +245,21 @@ export interface InstanceCreateRequest {
 
 export interface InstanceSummary extends Instance {
   status: InstanceStatus
-  /** Bytes on disk; computed lazily. */
+
   sizeBytes?: number
   modCount?: number
 }
 
-/* ------------------------------------------------------------------ */
-/* Content: mods, packs, worlds                                        */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export type ContentProvider = 'modrinth' | 'curseforge'
 
 export type ContentKind = 'mod' | 'resourcepack' | 'shader' | 'datapack' | 'modpack' | 'world'
 
 export interface LocalContent {
-  /** Stable id: relative path within the instance. */
+
   id: string
   kind: ContentKind
   fileName: string
@@ -274,13 +274,13 @@ export interface LocalContent {
   authors: string[]
   loaders: LoaderType[]
   gameVersions: string[]
-  /** Base64 data URL extracted from the jar/zip when available. */
+
   iconDataUrl: string | null
   homepage: string | null
   provider: ContentProvider | null
   projectId: string | null
   versionId: string | null
-  /** Populated by the update checker. */
+
   update: {
     versionId: string
     versionNumber: string
@@ -289,7 +289,7 @@ export interface LocalContent {
     changelog: string | null
     fileName: string
   } | null
-  /** Ids of other local content this file declares as required. */
+
   requiredDependencies: string[]
   problems: string[]
 }
@@ -326,9 +326,9 @@ export interface ServerInfo {
   iconDataUrl: string | null
 }
 
-/* ------------------------------------------------------------------ */
-/* Store (Modrinth + CurseForge)                                       */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface StoreProject {
   provider: ContentProvider
@@ -351,7 +351,7 @@ export interface StoreProject {
   createdAt: string
   license: string | null
   kind: ContentKind
-  /** Marks projects the user already has installed in the active instance. */
+
   installedVersionId?: string | null
 }
 
@@ -378,7 +378,7 @@ export interface StoreDependency {
   versionId: string | null
   fileName: string | null
   type: 'required' | 'optional' | 'incompatible' | 'embedded'
-  /** Resolved lazily for display. */
+
   projectName?: string | null
   projectIconUrl?: string | null
 }
@@ -426,7 +426,7 @@ export interface StoreSearchQuery {
   sort: StoreSort
   offset: number
   limit: number
-  /** When set, results are annotated with install state for this instance. */
+
   instanceId?: string | null
 }
 
@@ -435,7 +435,7 @@ export interface StoreSearchResult {
   offset: number
   limit: number
   total: number
-  /** Providers that failed for this query, e.g. a missing CurseForge key. */
+
   errors: { provider: ContentProvider; message: string }[]
 }
 
@@ -446,9 +446,9 @@ export interface StoreCategory {
   kind: ContentKind
 }
 
-/* ------------------------------------------------------------------ */
-/* Tasks / downloads                                                   */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export type TaskStatus = 'queued' | 'running' | 'paused' | 'success' | 'error' | 'cancelled'
 
@@ -457,11 +457,11 @@ export interface TaskInfo {
   title: string
   detail: string
   status: TaskStatus
-  /** 0..1, or -1 for indeterminate. */
+
   progress: number
   bytesDone: number
   bytesTotal: number
-  /** Bytes per second. */
+
   speed: number
   startedAt: number
   endedAt: number | null
@@ -471,9 +471,9 @@ export interface TaskInfo {
   kind: 'install' | 'download' | 'update' | 'backup' | 'import' | 'export' | 'java' | 'other'
 }
 
-/* ------------------------------------------------------------------ */
-/* Logs & crashes                                                      */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'stdout' | 'launcher'
 
@@ -493,14 +493,14 @@ export interface CrashReport {
   fileName: string
   createdAt: number
   sizeBytes: number
-  /** First meaningful exception line. */
+
   summary: string
   exitCode: number | null
 }
 
-/* ------------------------------------------------------------------ */
-/* Backups                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface BackupInfo {
   id: string
@@ -513,9 +513,9 @@ export interface BackupInfo {
   contents: ('saves' | 'mods' | 'config' | 'resourcepacks' | 'shaderpacks' | 'everything')[]
 }
 
-/* ------------------------------------------------------------------ */
-/* News & notifications                                                */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface NewsItem {
   id: string
@@ -538,12 +538,12 @@ export interface AppNotification {
   action?: { label: string; route: string } | null
 }
 
-/* ------------------------------------------------------------------ */
-/* Settings                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface AppSettings {
-  /* Appearance */
+
   theme: 'dark' | 'midnight' | 'light'
   accentColor: string
   reduceMotion: boolean
@@ -551,14 +551,14 @@ export interface AppSettings {
   instanceCardSize: 'compact' | 'regular' | 'large'
   showInstanceBackgrounds: boolean
 
-  /* Java defaults */
+
   memoryMinMb: number
   memoryMaxMb: number
   javaArgs: string
   defaultJavaRuntimeId: string | null
   autoDownloadJava: boolean
 
-  /* Launch defaults */
+
   closeLauncherOnLaunch: boolean
   openLogsOnLaunch: boolean
   windowWidth: number
@@ -568,34 +568,34 @@ export interface AppSettings {
   allowParallelInstances: boolean
   confirmBeforeLaunchingSnapshots: boolean
 
-  /* Downloads */
+
   maxConcurrentDownloads: number
   maxConcurrentTasks: number
   verifyDownloads: boolean
 
-  /* Paths */
+
   dataRoot: string
   instancesDir: string
   javaDir: string
-  /** Shared assets/libraries directory used by all instances. */
+
   sharedDir: string
 
-  /* Integrations */
+
   curseforgeApiKey: string
   enableModrinth: boolean
   enableCurseForge: boolean
-  /**
-   * Azure "Application (client) ID" used for Microsoft sign-in. Orbit ships
-   * without one so each install authenticates under its own registration.
-   */
+
+
+
+
   msaClientId: string
 
-  /* Updates */
+
   autoCheckUpdates: boolean
   autoDownloadUpdates: boolean
   updateChannel: 'stable' | 'beta'
 
-  /* Behaviour */
+
   minimizeToTray: boolean
   launchOnStartup: boolean
   showNewsOnHome: boolean
@@ -606,9 +606,9 @@ export interface AppSettings {
   analyticsEnabled: false
 }
 
-/* ------------------------------------------------------------------ */
-/* Updater                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface UpdateState {
   status: 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'error' | 'up-to-date'
@@ -619,9 +619,9 @@ export interface UpdateState {
   currentVersion: string
 }
 
-/* ------------------------------------------------------------------ */
-/* Misc                                                                */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface SystemInfo {
   platform: string

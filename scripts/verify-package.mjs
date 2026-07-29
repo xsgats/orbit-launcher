@@ -1,14 +1,14 @@
-/**
- * Smoke-tests a packaged build before it ships.
- *
- * electron-builder prunes node_modules by walking the dependency tree itself,
- * and that walk can silently drop a transitive package — the app then fails at
- * startup with an unreadable "Error" dialog. This script loads every external
- * module the main bundle requires, using the packaged Electron binary in Node
- * mode, so a broken package fails the build instead of the user's first launch.
- *
- *   node scripts/verify-package.mjs [path/to/win-unpacked]
- */
+
+
+
+
+
+
+
+
+
+
+
 import { execFileSync } from 'node:child_process'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -33,7 +33,7 @@ function fail(message) {
   process.exit(1)
 }
 
-/** Externals the bundler left as bare requires in the main bundle. */
+
 function externalsOf(mainBundle) {
   const source = readFileSync(mainBundle, 'utf8')
   const found = new Set()
@@ -48,7 +48,7 @@ const unpacked = findUnpacked()
 const exe = readdirSync(unpacked).find((file) => file.endsWith('.exe') && file !== 'elevate.exe')
 if (!exe) fail(`No application executable in ${unpacked}`)
 
-// The app lives either in an asar or a plain directory.
+
 const asar = join(unpacked, 'resources', 'app.asar')
 const plain = join(unpacked, 'resources', 'app')
 const appDir = existsSync(asar) ? asar : plain
@@ -62,8 +62,8 @@ if (!existsSync(mainBundle)) fail('out/main/index.js is missing — run the buil
 
 const externals = externalsOf(mainBundle)
 
-// Both checks run inside the packaged Electron so asar paths resolve the same
-// way they will at runtime.
+
+
 const script = `
 process.noAsar = false;
 const fs = require('fs');

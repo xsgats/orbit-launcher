@@ -112,7 +112,7 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
 
   return (
     <div className="col gap-6" style={{ maxWidth: 880 }}>
-      {/* Identity ---------------------------------------------------- */}
+      { }
       <section className="panel">
         <div className="panel__head">
           <Sparkles size={16} style={{ color: 'var(--text-tertiary)' }} />
@@ -238,7 +238,7 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
         </div>
       </section>
 
-      {/* Version ------------------------------------------------------ */}
+      { }
       <section className="panel">
         <div className="panel__head">
           <Wrench size={16} style={{ color: 'var(--text-tertiary)' }} />
@@ -295,7 +295,7 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
         </div>
       </section>
 
-      {/* Java --------------------------------------------------------- */}
+      { }
       <section className="panel">
         <div className="panel__head">
           <Cpu size={16} style={{ color: 'var(--text-tertiary)' }} />
@@ -356,7 +356,7 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
         </div>
       </section>
 
-      {/* Window & launch ------------------------------------------------ */}
+      { }
       <section className="panel">
         <div className="panel__head">
           <Terminal size={16} style={{ color: 'var(--text-tertiary)' }} />

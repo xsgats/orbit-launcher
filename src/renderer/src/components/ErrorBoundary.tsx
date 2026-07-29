@@ -10,10 +10,10 @@ interface State {
   stack: string | null
 }
 
-/**
- * A render error must never leave the user staring at a black window. This
- * catches it, shows what happened and offers a way back.
- */
+
+
+
+
 export class ErrorBoundary extends Component<Props, State> {
   override state: State = { error: null, stack: null }
 

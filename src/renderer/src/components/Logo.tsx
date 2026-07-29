@@ -1,9 +1,9 @@
 import { useId } from 'react'
 
-/**
- * The Orbit mark: a lit core with an inclined orbital ring and a satellite
- * riding the near side of the ring. Drawn inline so it inherits the accent.
- */
+
+
+
+
 export function Logo({ size = 28, glow = true }: { size?: number; glow?: boolean }): React.JSX.Element {
   const id = useId().replace(/:/g, '')
 
@@ -51,7 +51,7 @@ export function Logo({ size = 28, glow = true }: { size?: number; glow?: boolean
         )}
       </defs>
 
-      {/* Far half of the orbit */}
+      { }
       <g transform="rotate(-28 256 256)">
         <path
           d="M 60 256 A 196 92 0 0 1 452 256"
@@ -62,7 +62,7 @@ export function Logo({ size = 28, glow = true }: { size?: number; glow?: boolean
         />
       </g>
 
-      {/* Core */}
+      { }
       <g filter={glow ? `url(#${id}-glow)` : undefined}>
         <circle cx="256" cy="256" r="84" fill={`url(#${id}-core)`} />
       </g>
@@ -77,7 +77,7 @@ export function Logo({ size = 28, glow = true }: { size?: number; glow?: boolean
         strokeLinecap="round"
       />
 
-      {/* Near half of the orbit, plus the satellite */}
+      { }
       <g transform="rotate(-28 256 256)">
         <path
           d="M 452 256 A 196 92 0 0 1 60 256"
@@ -93,7 +93,7 @@ export function Logo({ size = 28, glow = true }: { size?: number; glow?: boolean
   )
 }
 
-/** Animated variant used on the boot screen. */
+
 export function LogoSpinner({ size = 64 }: { size?: number }): React.JSX.Element {
   return (
     <div

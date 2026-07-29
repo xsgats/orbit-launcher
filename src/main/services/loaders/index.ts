@@ -4,7 +4,7 @@ import type { TaskHandle } from '../tasks'
 import * as fabric from './fabric'
 import * as forge from './forge'
 
-/** Every Minecraft version a given loader can be installed on. */
+
 export async function loaderSupportedMinecraft(loader: LoaderType): Promise<string[]> {
   switch (loader) {
     case 'vanilla':
@@ -47,10 +47,10 @@ export async function latestLoaderVersion(loader: LoaderType, minecraftVersion: 
   }
 }
 
-/**
- * Installs the loader profile and returns the version id that should actually
- * be launched. For vanilla that is simply the Minecraft version.
- */
+
+
+
+
 export async function installLoader(
   loader: LoaderType,
   minecraftVersion: string,
@@ -73,7 +73,7 @@ export async function installLoader(
   }
 }
 
-/** Human-friendly loader version for display (Forge embeds the game version). */
+
 export function displayLoaderVersion(
   loader: LoaderType,
   minecraftVersion: string,

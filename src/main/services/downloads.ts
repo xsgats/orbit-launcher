@@ -12,17 +12,17 @@ import { TaskCancelledError, type TaskHandle } from './tasks'
 
 export interface DownloadSpec {
   url: string
-  /** Absolute destination path. */
+
   target: string
   sha1?: string | null
   sha256?: string | null
   sha512?: string | null
   size?: number | null
-  /** Alternative mirrors tried in order when the primary URL fails. */
+
   mirrors?: string[]
 }
 
-/** The strongest checksum the caller supplied, if any. */
+
 function pickDigest(spec: DownloadSpec): { algorithm: 'sha1' | 'sha256' | 'sha512'; expected: string } | null {
   if (spec.sha512) return { algorithm: 'sha512', expected: spec.sha512.toLowerCase() }
   if (spec.sha256) return { algorithm: 'sha256', expected: spec.sha256.toLowerCase() }
@@ -34,13 +34,13 @@ export interface DownloadOptions {
   concurrency?: number
   signal?: AbortSignal
   task?: TaskHandle
-  /** Called with cumulative bytes across the whole batch. */
+
   onProgress?: (bytesDone: number, bytesTotal: number, filesDone: number, filesTotal: number) => void
-  /** Skip hash verification for large batches where the caller already trusts the source. */
+
   verify?: boolean
 }
 
-/** True when the file on disk already matches the expected hash/size. */
+
 async function isUpToDate(spec: DownloadSpec, verify: boolean): Promise<boolean> {
   if (!(await exists(spec.target))) return false
   try {
@@ -107,10 +107,10 @@ async function downloadOne(
   throw lastError instanceof Error ? lastError : new Error(String(lastError))
 }
 
-/**
- * Downloads a batch of files with bounded concurrency, skipping anything
- * already present with a matching checksum.
- */
+
+
+
+
 export async function downloadAll(specs: DownloadSpec[], options: DownloadOptions = {}): Promise<void> {
   if (!specs.length) return
 
@@ -119,7 +119,7 @@ export async function downloadAll(specs: DownloadSpec[], options: DownloadOption
   const verify = options.verify ?? config.verifyDownloads
   const signal = options.signal ?? options.task?.signal
 
-  // Work out which files actually need fetching before reporting totals.
+
   const needed: DownloadSpec[] = []
   await mapConcurrent(specs, 24, async (spec) => {
     if (!(await isUpToDate(spec, verify))) needed.push(spec)
@@ -157,7 +157,7 @@ export async function downloadAll(specs: DownloadSpec[], options: DownloadOption
   options.task?.setProgress(1, bytesDone, bytesTotal)
 }
 
-/** Single-file download used by installers and content installs. */
+
 export async function downloadFile(spec: DownloadSpec, options: DownloadOptions = {}): Promise<void> {
   const config = settings.get()
   const verify = options.verify ?? config.verifyDownloads

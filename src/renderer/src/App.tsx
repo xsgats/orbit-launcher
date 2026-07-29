@@ -118,7 +118,7 @@ export function App(): React.JSX.Element {
         setPaletteOpen((open) => !open)
       }
       if (event.key === 'F5' || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'r')) {
-        // Reloading mid-download would orphan tasks in the main process.
+
         event.preventDefault()
       }
     }
@@ -126,7 +126,7 @@ export function App(): React.JSX.Element {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Main-process notifications can ask the UI to navigate.
+
   useEffect(() => api.on('navigate', ({ route }) => navigate(route)), [])
 
   if (bootError) {

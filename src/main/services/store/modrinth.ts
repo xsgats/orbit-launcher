@@ -54,9 +54,9 @@ function toSide(value: string | undefined): StoreProject['clientSide'] {
   return 'unknown'
 }
 
-/* ------------------------------------------------------------------ */
-/* Wire shapes                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface ModrinthHit {
   project_id: string
@@ -140,9 +140,9 @@ interface ModrinthMember {
   user: { username: string; name?: string | null; avatar_url?: string | null }
 }
 
-/* ------------------------------------------------------------------ */
-/* Mapping                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function mapHit(hit: ModrinthHit): StoreProject {
   const loaders = toLoaders(hit.categories)
@@ -205,15 +205,15 @@ function mapVersion(version: ModrinthVersion): StoreVersion {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* API                                                                 */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export async function search(query: StoreSearchQuery): Promise<StoreSearchResult> {
   const facets: string[][] = [[`project_type:${KIND_TO_PROJECT_TYPE[query.kind]}`]]
 
   if (query.gameVersions.length) facets.push(query.gameVersions.map((v) => `versions:${v}`))
-  // Resource packs and shaders are not loader-specific.
+
   if (query.loaders.length && (query.kind === 'mod' || query.kind === 'modpack')) {
     facets.push(query.loaders.map((loader) => `categories:${loader}`))
   }
@@ -319,14 +319,14 @@ export async function version(versionId: string): Promise<StoreVersion> {
   return mapVersion(result)
 }
 
-/** Identifies an installed file by its SHA-1 so Orbit can offer updates. */
+
 export async function lookupByHashes(
   hashes: string[]
 ): Promise<Map<string, StoreVersion>> {
   const out = new Map<string, StoreVersion>()
   if (!hashes.length) return out
 
-  // The bulk endpoint caps out well before typical modpack sizes.
+
   for (let i = 0; i < hashes.length; i += 200) {
     const batch = hashes.slice(i, i + 200)
     try {
@@ -337,14 +337,14 @@ export async function lookupByHashes(
       )
       for (const [hash, value] of Object.entries(result)) out.set(hash.toLowerCase(), mapVersion(value))
     } catch {
-      /* an unmatched batch just means no update info for those files */
+
     }
   }
 
   return out
 }
 
-/** Asks Modrinth directly which newer file replaces each installed hash. */
+
 export async function latestForHashes(
   hashes: string[],
   loaders: LoaderType[],
@@ -368,7 +368,7 @@ export async function latestForHashes(
       )
       for (const [hash, value] of Object.entries(result)) out.set(hash.toLowerCase(), mapVersion(value))
     } catch {
-      /* leave those files without an update entry */
+
     }
   }
 

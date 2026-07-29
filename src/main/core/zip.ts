@@ -36,7 +36,7 @@ function readEntryBuffer(zip: ZipFile, entry: Entry): Promise<Buffer> {
 
 const isDirEntry = (entry: Entry): boolean => /[/\\]$/.test(entry.fileName)
 
-/** Iterate a zip's entries, letting the visitor pull bytes for the ones it wants. */
+
 async function eachEntry(
   path: string,
   visitor: (entry: Entry, read: () => Promise<Buffer>) => Promise<'continue' | 'stop'>
@@ -76,7 +76,7 @@ export async function listZipEntries(path: string): Promise<ZipEntryInfo[]> {
   return out
 }
 
-/** Reads a single entry by exact name. Returns null when the entry is absent. */
+
 export async function readZipEntry(path: string, entryName: string): Promise<Buffer | null> {
   let found: Buffer | null = null
   const wanted = entryName.toLowerCase()
@@ -90,7 +90,7 @@ export async function readZipEntry(path: string, entryName: string): Promise<Buf
   return found
 }
 
-/** Reads every entry matching `predicate` in one pass. */
+
 export async function readZipEntries(
   path: string,
   predicate: (fileName: string) => boolean
@@ -106,9 +106,9 @@ export async function readZipEntries(
 }
 
 export interface ExtractOptions {
-  /** Return false to skip an entry. */
+
   filter?: (fileName: string) => boolean
-  /** Strip this leading path segment (e.g. "overrides/") from extracted names. */
+
   stripPrefix?: string
   onProgress?: (done: number, total: number, fileName: string) => void
   signal?: AbortSignal
@@ -134,7 +134,7 @@ export async function extractZip(path: string, destDir: string, options: Extract
     }
     if (!name || (filter && !filter(name))) return 'continue'
 
-    // Zip-slip guard: the resolved target must stay inside destDir.
+
     const target = resolve(root, normalize(name))
     if (target !== root && !target.startsWith(root + sep)) return 'continue'
 
@@ -156,11 +156,11 @@ export async function extractZip(path: string, destDir: string, options: Extract
 }
 
 export interface ZipSource {
-  /** Absolute path to a file or directory. */
+
   path: string
-  /** Where it lands inside the archive. */
+
   archivePath: string
-  /** Directory-only: exclude entries whose archive-relative path matches. */
+
   ignore?: string[]
 }
 
@@ -211,7 +211,7 @@ export async function createZip(
   })
 }
 
-/** Convenience for reading a JSON file out of an archive. */
+
 export async function readZipJson<T>(path: string, entryName: string): Promise<T | null> {
   const buffer = await readZipEntry(path, entryName)
   if (!buffer) return null
@@ -222,7 +222,7 @@ export async function readZipJson<T>(path: string, entryName: string): Promise<T
   }
 }
 
-/** Finds the first entry whose name matches, useful for jar icons. */
+
 export async function findZipEntry(
   path: string,
   predicate: (fileName: string) => boolean

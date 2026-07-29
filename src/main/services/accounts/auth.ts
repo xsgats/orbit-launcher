@@ -8,9 +8,9 @@ import { log } from '../../core/logger'
 import { getJson, postJson, request } from '../../core/net'
 import { settings } from '../../core/settings'
 
-/* ------------------------------------------------------------------ */
-/* Endpoints                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 const MSA_AUTHORIZE = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize'
 const MSA_TOKEN = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/token'
@@ -22,9 +22,9 @@ const MC_LOGIN = 'https://api.minecraftservices.com/authentication/login_with_xb
 const MC_ENTITLEMENTS = 'https://api.minecraftservices.com/entitlements/mcstore'
 const MC_PROFILE = 'https://api.minecraftservices.com/minecraft/profile'
 
-/* ------------------------------------------------------------------ */
-/* Errors                                                              */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export class AuthError extends Error {
   constructor(
@@ -47,9 +47,9 @@ export class AuthError extends Error {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Wire shapes                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface MsaTokenResponse {
   access_token: string
@@ -89,9 +89,9 @@ export interface AuthSession {
   ownsMinecraft: boolean
 }
 
-/* ------------------------------------------------------------------ */
-/* PKCE + loopback redirect                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function base64Url(input: Buffer): string {
   return input.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
@@ -123,9 +123,9 @@ function report(stage: AuthProgress['stage'], message: string, detail?: string):
   emit('auth:progress', { stage, message, detail })
 }
 
-/* ------------------------------------------------------------------ */
-/* Step 1 — Microsoft interactive sign-in                              */
-/* ------------------------------------------------------------------ */
+
+
+
 
 let activeLoginController: AbortController | null = null
 
@@ -141,18 +141,18 @@ async function interactiveMicrosoftLogin(clientId: string): Promise<MsaTokenResp
   const { verifier, challenge } = createPkce()
   const state = base64Url(randomBytes(24))
 
-  /*
-   * Loopback listener on an ephemeral port.
-   *
-   * The redirect URI must be exactly `http://localhost:<port>` with no path:
-   * Microsoft ignores the port only for `localhost` (not for 127.0.0.1), and
-   * the path still has to match the registered value character for character.
-   * So this pairs with a single registered redirect URI of `http://localhost`.
-   *
-   * The socket binds to 127.0.0.1 rather than every interface, which keeps the
-   * callback off the local network. Browsers that try ::1 first fall back to
-   * IPv4 on connection refused, and Microsoft does not support [::1] anyway.
-   */
+
+
+
+
+
+
+
+
+
+
+
+
   const server: Server = createServer()
   const redirectUri = await new Promise<string>((resolvePromise, reject) => {
     server.on('error', reject)
@@ -169,8 +169,8 @@ async function interactiveMicrosoftLogin(clientId: string): Promise<MsaTokenResp
       const code = url.searchParams.get('code')
       const returnedState = url.searchParams.get('state')
 
-      // The browser also asks for /favicon.ico and similar; only the request
-      // actually carrying the authorization response is the callback.
+
+
       if (!error && !code) {
         res.writeHead(404).end()
         return
@@ -206,10 +206,10 @@ async function interactiveMicrosoftLogin(clientId: string): Promise<MsaTokenResp
   authorizeUrl.searchParams.set('state', state)
   authorizeUrl.searchParams.set('code_challenge', challenge)
   authorizeUrl.searchParams.set('code_challenge_method', 'S256')
-  // Always show the picker so a second account can be added.
+
   authorizeUrl.searchParams.set('prompt', 'select_account')
 
-  // A throwaway partition keeps each sign-in independent of the last.
+
   const partition = `orbit-msa-${Date.now()}`
   const authWindow = new BrowserWindow({
     width: 520,
@@ -244,7 +244,7 @@ async function interactiveMicrosoftLogin(clientId: string): Promise<MsaTokenResp
     try {
       await session.fromPartition(partition).clearStorageData()
     } catch {
-      /* the partition is in-memory anyway */
+
     }
     if (activeLoginController === controller) activeLoginController = null
   }
@@ -304,9 +304,9 @@ export async function refreshMicrosoftToken(clientId: string, refreshToken: stri
   return (await response.json()) as MsaTokenResponse
 }
 
-/* ------------------------------------------------------------------ */
-/* Steps 2-6 — Xbox Live -> XSTS -> Minecraft                          */
-/* ------------------------------------------------------------------ */
+
+
+
 
 const XERR_MESSAGES: Record<string, { message: string; code: AuthError['code'] }> = {
   '2148916233': {
@@ -371,7 +371,7 @@ async function authorizeXsts(xblToken: string): Promise<XboxAuthResponse> {
     retries: 2,
     noRetryStatuses: [401, 403]
   }).catch(async (err) => {
-    // XSTS reports actionable account problems as an XErr in a 401 body.
+
     const body = (err as { body?: string }).body ?? ''
     const match = /"XErr"\s*:\s*(\d+)/.exec(body)
     if (match) {
@@ -398,11 +398,11 @@ async function loginToMinecraft(uhs: string, xstsToken: string): Promise<McLogin
   }
 }
 
-/**
- * Confirms the account actually owns Minecraft: Java Edition. Orbit refuses to
- * create an account without a genuine entitlement — there is no offline or
- * cracked mode.
- */
+
+
+
+
+
 async function verifyEntitlement(accessToken: string): Promise<boolean> {
   report('entitlements', 'Verifying your Minecraft licence…')
   try {
@@ -411,7 +411,7 @@ async function verifyEntitlement(accessToken: string): Promise<boolean> {
       retries: 2
     })
     const names = new Set((result.items ?? []).map((item) => item.name))
-    // Either the classic product entitlement or a Game Pass grant is enough.
+
     return (
       names.has('product_minecraft') ||
       names.has('game_minecraft') ||
@@ -444,7 +444,7 @@ async function fetchProfile(accessToken: string): Promise<McProfileResponse> {
   }
 }
 
-/** Runs the Xbox -> Minecraft half of the chain from a Microsoft access token. */
+
 async function completeChain(msa: MsaTokenResponse): Promise<AuthSession> {
   const xbl = await authenticateWithXboxLive(msa.access_token)
   const uhs = xbl.DisplayClaims?.xui?.[0]?.uhs
@@ -490,7 +490,7 @@ function requireClientId(): string {
   return clientId
 }
 
-/** Full interactive sign-in. */
+
 export async function signIn(): Promise<AuthSession> {
   const clientId = requireClientId()
   try {
@@ -507,7 +507,7 @@ export async function signIn(): Promise<AuthSession> {
   }
 }
 
-/** Silent refresh using the stored Microsoft refresh token. */
+
 export async function refreshSession(msaRefreshToken: string): Promise<AuthSession> {
   const clientId = requireClientId()
   const msa = await refreshMicrosoftToken(clientId, msaRefreshToken)

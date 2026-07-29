@@ -24,11 +24,11 @@ import { tasks, type TaskHandle } from '../tasks'
 import * as curseforge from './curseforge'
 import * as modrinth from './modrinth'
 
-/* ------------------------------------------------------------------ */
-/* Search                                                              */
-/* ------------------------------------------------------------------ */
 
-/** Interleaves two ranked lists so neither provider dominates the grid. */
+
+
+
+
 function interleave<T>(a: T[], b: T[]): T[] {
   const out: T[] = []
   const max = Math.max(a.length, b.length)
@@ -143,7 +143,7 @@ export async function categories(kind: ContentKind): Promise<StoreCategory[]> {
       : Promise.resolve([])
   ])
 
-  // Modrinth's taxonomy is the canonical one; CurseForge fills gaps.
+
   const seen = new Set(lists[0].map((category) => category.name.toLowerCase()))
   return [...lists[0], ...lists[1].filter((category) => !seen.has(category.name.toLowerCase()))]
 }
@@ -156,9 +156,9 @@ async function getVersion(
   return provider === 'modrinth' ? modrinth.version(versionId) : curseforge.version(projectId, versionId)
 }
 
-/* ------------------------------------------------------------------ */
-/* Installing                                                          */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function bestVersion(
   candidates: StoreVersion[],
@@ -212,7 +212,7 @@ async function installSingleVersion(
   })
 }
 
-/** Resolves required dependencies one level deep, which covers real-world packs. */
+
 async function resolveDependencies(
   instance: Instance,
   version: StoreVersion
@@ -285,9 +285,9 @@ export async function install(request: InstallVersionRequest): Promise<void> {
   )
 }
 
-/* ------------------------------------------------------------------ */
-/* Modpacks                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface ModrinthIndex {
   formatVersion: number
@@ -341,7 +341,7 @@ function loaderFromCurseForgeId(id: string): { loader: LoaderType; loaderVersion
   }
 }
 
-/** Downloads a modpack archive and builds a fully configured instance from it. */
+
 export async function installModpack(
   provider: ContentProvider,
   projectId: string,
@@ -428,7 +428,7 @@ async function inspectModpackArchive(archivePath: string, fallbackName: string):
   }
 }
 
-/** Creates a brand-new instance from a modpack archive. */
+
 export async function createInstanceFromArchive(
   archivePath: string,
   fallbackName: string,
@@ -462,7 +462,7 @@ export async function createInstanceFromArchive(
   return instance
 }
 
-/** Unpacks a modpack archive into an instance that already exists on disk. */
+
 async function applyModpackArchive(
   archivePath: string,
   instance: Instance,
@@ -472,7 +472,7 @@ async function applyModpackArchive(
   const { modrinthIndex, curseManifest } = info
   const gameDir = instances.gameDir(instance)
 
-  /* --- Mods --- */
+
   if (modrinthIndex) {
     const wanted = modrinthIndex.files.filter((entry) => entry.env?.client !== 'unsupported')
     task.setDetail(`Downloading ${wanted.length} filesâ€¦`)
@@ -544,7 +544,7 @@ async function applyModpackArchive(
     }
   }
 
-  /* --- Overrides --- */
+
   task.setDetail('Applying pack configurationâ€¦')
   const overridesFolder = curseManifest?.overrides ?? 'overrides'
   await extractZip(archivePath, gameDir, {
@@ -556,7 +556,7 @@ async function applyModpackArchive(
   task.setProgress(1)
 }
 
-/** Re-applies a newer version of the modpack an instance was created from. */
+
 export async function updateModpack(instanceId: string, versionId: string): Promise<void> {
   const instance = await instances.require(instanceId)
   if (!instance.modpack) throw new Error('This instance was not created from a modpack.')
@@ -579,7 +579,7 @@ export async function updateModpack(instanceId: string, versionId: string): Prom
 
       const info = await inspectModpackArchive(archive, origin.projectName)
 
-      // Replacing mods wholesale is what pack authors expect; worlds and configs stay.
+
       task.setDetail('Replacing modsâ€¦')
       await removePath(join(instances.gameDir(instance), 'mods'))
 

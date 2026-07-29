@@ -15,7 +15,7 @@ import { tasks, type TaskHandle } from './tasks'
 
 const execFileAsync = promisify(execFile)
 
-/** Java majors Orbit can install on demand. */
+
 export const SUPPORTED_JAVA_MAJORS = [8, 17, 21] as const
 
 const JAVA_LABELS: Record<number, string> = {
@@ -29,20 +29,20 @@ interface JavaIndexFile {
   runtimes: JavaRuntime[]
 }
 
-/* ------------------------------------------------------------------ */
-/* Probing                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function parseMajor(version: string): number {
   const cleaned = version.trim().replace(/^"|"$/g, '')
-  // "1.8.0_402" -> 8, "17.0.9" -> 17
+
   const legacy = /^1\.(\d+)/.exec(cleaned)
   if (legacy) return Number(legacy[1])
   const modern = /^(\d+)/.exec(cleaned)
   return modern ? Number(modern[1]) : 0
 }
 
-/** Reads a JDK/JRE `release` file — far faster than spawning the JVM. */
+
 async function readReleaseFile(home: string): Promise<{ version: string; vendor: string; arch: string } | null> {
   try {
     const raw = await readFile(join(home, 'release'), 'utf8')
@@ -62,7 +62,7 @@ async function readReleaseFile(home: string): Promise<{ version: string; vendor:
   }
 }
 
-/** Fallback probe: ask the JVM itself. */
+
 async function probeExecutable(javaExe: string): Promise<{ version: string; vendor: string; arch: string } | null> {
   try {
     const { stderr, stdout } = await execFileAsync(javaExe, ['-XshowSettings:properties', '-version'], {
@@ -83,7 +83,7 @@ async function probeExecutable(javaExe: string): Promise<{ version: string; vend
   }
 }
 
-/** Prefer javaw.exe so launching the game never flashes a console window. */
+
 async function resolveJavaExecutable(home: string): Promise<string | null> {
   for (const name of ['javaw.exe', 'java.exe']) {
     const candidate = join(home, 'bin', name)
@@ -96,7 +96,7 @@ function runtimeIdFor(path: string): string {
   return createHash('sha1').update(path.toLowerCase()).digest('hex').slice(0, 16)
 }
 
-/** Best-effort vendor name when the `release` file omits IMPLEMENTOR. */
+
 function guessVendor(home: string): string {
   const lower = home.toLowerCase()
   if (lower.includes('adoptium') || lower.includes('temurin')) return 'Eclipse Temurin'
@@ -123,8 +123,8 @@ export async function inspectJavaHome(home: string, managed: boolean): Promise<J
   const vendor = !cleanedVendor || cleanedVendor.toLowerCase() === 'unknown' ? guessVendor(home) : cleanedVendor
   const version = info.version.replace(/^"|"$/g, '')
 
-  // Resolve junctions (e.g. "Java\latest\jdk-26") so aliases of the same
-  // installation collapse into one entry.
+
+
   const canonical = await realpath(executable).catch(() => executable)
 
   return {
@@ -139,7 +139,7 @@ export async function inspectJavaHome(home: string, managed: boolean): Promise<J
   }
 }
 
-/** Accepts either a JDK home or a path to java/javaw.exe. */
+
 async function normalizeToHome(input: string): Promise<string> {
   try {
     const info = await stat(input)
@@ -148,14 +148,14 @@ async function normalizeToHome(input: string): Promise<string> {
       return basename(bin).toLowerCase() === 'bin' ? dirname(bin) : bin
     }
   } catch {
-    /* fall through */
+
   }
   return input
 }
 
-/* ------------------------------------------------------------------ */
-/* Discovery                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function candidateRoots(): string[] {
   const programFiles = process.env.ProgramFiles ?? 'C:\\Program Files'
@@ -177,7 +177,7 @@ function candidateRoots(): string[] {
     join(programFilesX86, 'Java'),
     join(programFilesX86, 'Eclipse Adoptium'),
     localAppData ? join(localAppData, 'Programs', 'Eclipse Adoptium') : '',
-    // Mojang's own bundled runtimes.
+
     localAppData ? join(localAppData, 'Packages') : '',
     join(programFilesX86, 'Minecraft Launcher', 'runtime'),
     paths.javaDir
@@ -207,9 +207,9 @@ async function scanRoot(root: string, depth: number, found: Set<string>): Promis
   return homes
 }
 
-/* ------------------------------------------------------------------ */
-/* Store                                                               */
-/* ------------------------------------------------------------------ */
+
+
+
 
 class JavaManager {
   private runtimes: JavaRuntime[] = []
@@ -220,7 +220,7 @@ class JavaManager {
     this.runtimes = stored?.runtimes ?? []
     this.loaded = true
 
-    // Drop entries whose files disappeared since last run.
+
     const alive: JavaRuntime[] = []
     for (const runtime of this.runtimes) {
       if (await exists(runtime.path)) alive.push(runtime)
@@ -245,7 +245,7 @@ class JavaManager {
     return [...this.runtimes]
   }
 
-  /** Rescan the disk, merging with anything the user added manually. */
+
   async scan(): Promise<JavaRuntime[]> {
     const seen = new Set<string>()
     const homes: string[] = []
@@ -261,7 +261,7 @@ class JavaManager {
       if (runtime && !discovered.some((r) => r.id === runtime.id)) discovered.push(runtime)
     }
 
-    // Keep manual entries that live outside the scanned roots.
+
     const manual = this.runtimes.filter((r) => !r.managed && !discovered.some((d) => d.id === r.id))
     const stillThere: JavaRuntime[] = []
     for (const runtime of manual) {
@@ -292,7 +292,7 @@ class JavaManager {
     if (!runtime) return
     this.runtimes = this.runtimes.filter((r) => r.id !== id)
     await this.persist()
-    // Managed runtimes are Orbit's to delete; system installs are left alone.
+
     if (runtime.managed) {
       const home = dirname(dirname(runtime.path))
       if (home.toLowerCase().startsWith(paths.javaDir.toLowerCase())) await removePath(home)
@@ -323,7 +323,7 @@ class JavaManager {
     }))
   }
 
-  /** Downloads an Eclipse Temurin runtime into Orbit's managed Java folder. */
+
   async install(majorVersion: number, existingTask?: TaskHandle): Promise<JavaRuntime> {
     const run = async (task: TaskHandle): Promise<JavaRuntime> => {
       task.setDetail('Looking up the latest Temurin build…')
@@ -350,7 +350,7 @@ class JavaManager {
         signal: task.signal
       })
 
-      // Temurin archives contain a single top-level folder.
+
       const entries = await readdir(staging)
       const root = entries.length === 1 ? join(staging, entries[0]) : staging
       await rename(root, targetHome)
@@ -375,10 +375,10 @@ class JavaManager {
     return tasks.run({ title: `Installing Java ${majorVersion}`, kind: 'java' }, run)
   }
 
-  /**
-   * Picks the best runtime for a Minecraft version, installing one if the
-   * user has enabled automatic Java management.
-   */
+
+
+
+
   async resolveFor(
     requiredMajor: number,
     override?: { runtimeId?: string | null; path?: string | null }
@@ -404,7 +404,7 @@ class JavaManager {
     const exact = available.filter((r) => r.majorVersion === requiredMajor && r.arch === 'x64')
     if (exact.length) return exact[0]
 
-    // Java 8 code does not run on newer JVMs reliably, so only step up for 17+.
+
     if (requiredMajor >= 17) {
       const newer = available
         .filter((r) => r.majorVersion > requiredMajor && r.arch === 'x64')
@@ -413,7 +413,7 @@ class JavaManager {
     }
 
     if (settings.get().autoDownloadJava) {
-      // Smallest supported major that still satisfies the requirement.
+
       const installable =
         SUPPORTED_JAVA_MAJORS.filter((major) => major >= requiredMajor).sort((a, b) => a - b)[0] ??
         Math.max(...SUPPORTED_JAVA_MAJORS)
@@ -430,7 +430,7 @@ class JavaManager {
     )
   }
 
-  /** Heuristic used when Mojang's metadata does not specify a Java version. */
+
   recommendedMajorFor(minecraftVersion: string): number {
     const match = /^1\.(\d+)(?:\.(\d+))?/.exec(minecraftVersion)
     if (!match) return 21
@@ -444,9 +444,9 @@ class JavaManager {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Adoptium                                                            */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface AdoptiumAsset {
   binary: {

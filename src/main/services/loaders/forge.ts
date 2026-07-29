@@ -14,9 +14,9 @@ import { mavenPath, type Library, type VersionJson } from '../minecraft/schema'
 import { saveVersionJson, versionJarPath } from '../minecraft/versions'
 import { TaskCancelledError, type TaskHandle } from '../tasks'
 
-/* ------------------------------------------------------------------ */
-/* Flavour configuration                                               */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export type ForgeFlavour = 'forge' | 'neoforge'
 
@@ -24,9 +24,9 @@ const FORGE_MAVEN = 'https://maven.minecraftforge.net'
 const NEOFORGE_MAVEN = 'https://maven.neoforged.net/releases'
 const TTL = 15 * 60 * 1000
 
-/* ------------------------------------------------------------------ */
-/* Version listing                                                     */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface ForgePromotions {
   promos: Record<string, string>
@@ -69,9 +69,9 @@ async function neoforgeVersions(): Promise<string[]> {
   })
 }
 
-/** NeoForge encodes the game version in its own: `20.4.190` -> `1.20.4`. */
+
 export function neoforgeMinecraftVersion(version: string): string | null {
-  // The 1.20.1 line kept Forge's `1.20.1-47.x` scheme.
+
   const legacy = /^(\d+\.\d+(?:\.\d+)?)-/.exec(version)
   if (legacy) return legacy[1]
 
@@ -155,7 +155,7 @@ function compareNeoDesc(a: string, b: string): number {
   return 0
 }
 
-/** `1.20.1-47.2.20` -> `47.2.20` for display and promotion lookups. */
+
 export function shortForgeVersion(minecraftVersion: string, full: string): string {
   return full.startsWith(`${minecraftVersion}-`) ? full.slice(minecraftVersion.length + 1) : full
 }
@@ -174,9 +174,9 @@ export async function latestLoaderVersion(
   return chosen.id
 }
 
-/* ------------------------------------------------------------------ */
-/* Installer manifests                                                 */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface Processor {
   sides?: string[]
@@ -196,7 +196,7 @@ interface InstallProfile {
   libraries?: Library[]
   processors?: Processor[]
   data?: Record<string, { client: string; server: string }>
-  /** Pre-1.13 installers embed everything in these two fields. */
+
   install?: {
     profileName?: string
     target?: string
@@ -215,20 +215,20 @@ function installerUrl(flavour: ForgeFlavour, minecraftVersion: string, loaderVer
       : `${minecraftVersion}-${loaderVersion}`
     return `${FORGE_MAVEN}/net/minecraftforge/forge/${full}/forge-${full}-installer.jar`
   }
-  // NeoForge kept the old coordinates for the 1.20.1 line.
+
   const artifact = /^\d+\.\d+(\.\d+)?-/.test(loaderVersion) ? 'forge' : 'neoforge'
   return `${NEOFORGE_MAVEN}/net/neoforged/${artifact}/${loaderVersion}/${artifact}-${loaderVersion}-installer.jar`
 }
 
-/* ------------------------------------------------------------------ */
-/* Processor execution                                                 */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function libraryPathFor(coordinate: string): string {
   return join(paths.librariesDir, ...mavenPath(coordinate).split('/'))
 }
 
-/** `[net.minecraftforge:forge:1.20.1-47.2.20:client]` -> absolute jar path. */
+
 function resolveToken(token: string, data: Map<string, string>): string {
   if (token.startsWith('[') && token.endsWith(']')) {
     return libraryPathFor(token.slice(1, -1))
@@ -240,7 +240,7 @@ async function readMainClass(jarPath: string): Promise<string> {
   const manifest = await readZipEntry(jarPath, 'META-INF/MANIFEST.MF')
   if (!manifest) throw new Error(`No manifest in ${jarPath}`)
 
-  // Unfold the 72-byte line wrapping the jar spec mandates.
+
   const unfolded = manifest.toString('utf8').replace(/\r\n/g, '\n').replace(/\n /g, '')
   const match = /^Main-Class:\s*(.+)$/m.exec(unfolded)
   if (!match) throw new Error(`No Main-Class in ${jarPath}`)
@@ -262,7 +262,7 @@ async function runProcessor(
   const mainClass = await readMainClass(jarPath)
   const args = processor.args.map((arg) => resolveToken(arg, data))
 
-  // Skip work that a previous install already produced.
+
   if (processor.outputs && Object.keys(processor.outputs).length) {
     let allFresh = true
     for (const [rawTarget, rawHash] of Object.entries(processor.outputs)) {
@@ -304,7 +304,7 @@ async function runProcessor(
     )
   })
 
-  // Verify what the processor claimed to produce.
+
   for (const [rawTarget, rawHash] of Object.entries(processor.outputs ?? {})) {
     const target = resolveToken(rawTarget, data)
     const expected = resolveToken(rawHash, data).replace(/'/g, '')
@@ -318,14 +318,14 @@ async function runProcessor(
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Install                                                             */
-/* ------------------------------------------------------------------ */
 
-/**
- * Installs Forge or NeoForge by running the official installer's own
- * transformation pipeline, exactly as the vendor's installer would.
- */
+
+
+
+
+
+
+
 export async function installForgeLike(
   flavour: ForgeFlavour,
   minecraftVersion: string,
@@ -345,9 +345,9 @@ export async function installForgeLike(
   const workDir = await mkdtemp(join(tmpdir(), 'orbit-forge-'))
 
   try {
-    /* -------------------------------------------------------------- */
-    /* Legacy installers (Minecraft 1.12.2 and older)                  */
-    /* -------------------------------------------------------------- */
+
+
+
     if (profile.versionInfo && profile.install) {
       task?.setDetail(`Installing ${name}…`)
       const versionJson = profile.versionInfo
@@ -355,7 +355,7 @@ export async function installForgeLike(
       if (!versionJson.inheritsFrom) versionJson.inheritsFrom = minecraftVersion
       await saveVersionJson(versionJson)
 
-      // The universal jar lives at the installer root; move it into the library store.
+
       const filePath = profile.install.filePath
       const coordinate = profile.install.path
       if (filePath && coordinate) {
@@ -367,7 +367,7 @@ export async function installForgeLike(
         }
       }
 
-      // Newer 1.12 installers also ship a bundled maven tree.
+
       await extractZip(installerJar, paths.librariesDir, { stripPrefix: 'maven/' }).catch(() => 0)
 
       task?.setProgress(1)
@@ -375,9 +375,9 @@ export async function installForgeLike(
       return versionJson.id
     }
 
-    /* -------------------------------------------------------------- */
-    /* Modern installers (Minecraft 1.13+)                             */
-    /* -------------------------------------------------------------- */
+
+
+
     const versionJson = await readZipJson<VersionJson>(installerJar, (profile.json ?? '/version.json').replace(/^\//, ''))
     if (!versionJson?.id) throw new Error(`The ${name} installer did not contain a version manifest`)
 
@@ -389,7 +389,7 @@ export async function installForgeLike(
     await extractZip(installerJar, paths.librariesDir, { stripPrefix: 'maven/' }).catch(() => 0)
     await extractZip(installerJar, join(workDir, 'data'), { stripPrefix: 'data/' }).catch(() => 0)
 
-    // Installer-only tooling (jarsplitter, ForgeAutoRenamingTool, …).
+
     task?.setDetail('Downloading installer tools…')
     const toolSpecs = (profile.libraries ?? [])
       .map((library) => {
@@ -414,7 +414,7 @@ export async function installForgeLike(
       return versionJson.id
     }
 
-    /* Build the substitution table the processors expect. */
+
     task?.setDetail('Preparing the patch pipeline…')
     const data = new Map<string, string>()
     const vanillaJar = versionJarPath(profile.minecraft ?? minecraftVersion)
@@ -432,7 +432,7 @@ export async function installForgeLike(
       if (raw.startsWith('[') && raw.endsWith(']')) {
         data.set(key, libraryPathFor(raw.slice(1, -1)))
       } else if (raw.startsWith('/')) {
-        // Extracted above into <workDir>/data.
+
         data.set(key, join(workDir, 'data', ...raw.replace(/^\/data\//, '').replace(/^\//, '').split('/')))
       } else {
         data.set(key, raw.replace(/^'|'$/g, ''))
@@ -445,10 +445,10 @@ export async function installForgeLike(
       )
     }
 
-    /* Processors run on a JVM matching the game's requirement. */
+
     const requiredMajor = versionJson.javaVersion?.majorVersion ?? java.recommendedMajorFor(minecraftVersion)
     const runtime = await java.resolveFor(requiredMajor)
-    // Processors want a console JVM; javaw.exe detaches and loses the exit code.
+
     const javaExe = runtime.path.replace(/javaw\.exe$/i, 'java.exe')
 
     const total = profile.processors.length
@@ -467,7 +467,7 @@ export async function installForgeLike(
   }
 }
 
-/** Used by the instance installer to know whether a rerun is needed. */
+
 export async function forgeArtifactsPresent(versionId: string): Promise<boolean> {
   const dir = join(paths.versionsDir, versionId)
   if (!(await exists(dir))) return false

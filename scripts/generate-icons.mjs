@@ -1,7 +1,7 @@
-/**
- * Renders the Orbit brand SVG into every raster size the app + installer need.
- *   node scripts/generate-icons.mjs
- */
+
+
+
+
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'

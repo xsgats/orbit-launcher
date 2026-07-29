@@ -17,7 +17,7 @@ class Logger {
       try {
         if (statSync(file).size > MAX_LOG_BYTES) renameSync(file, `${file}.1`)
       } catch {
-        /* no existing log */
+
       }
       this.stream = createWriteStream(file, { flags: 'a' })
       this.info('orbit', `--- Orbit Launcher session started ${new Date().toISOString()} ---`)

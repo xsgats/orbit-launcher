@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 export interface Route {
-  /** Path without the leading `#`, e.g. `/instances/abc`. */
+
   path: string
   segments: string[]
   query: URLSearchParams
@@ -53,7 +53,7 @@ export function back(): void {
   window.history.back()
 }
 
-/** Rewrites a single query parameter without touching the rest of the URL. */
+
 export function setQueryParam(key: string, value: string | null): void {
   const route = parse()
   const query = new URLSearchParams(route.query)
@@ -68,7 +68,7 @@ export function useQueryParam(key: string, fallback = ''): string {
   return route.query.get(key) ?? fallback
 }
 
-/** `/instances/:id` -> `{ id }`, or null when the pattern does not match. */
+
 export function matchRoute(pattern: string, path: string): Record<string, string> | null {
   const patternParts = pattern.split('/').filter(Boolean)
   const pathParts = path.split('/').filter(Boolean)

@@ -15,19 +15,19 @@ export interface ModMetadata {
   dependencies: string[]
 }
 
-/* ------------------------------------------------------------------ */
-/* Tiny TOML reader                                                    */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface TomlTable {
   [key: string]: string | string[] | TomlTable | TomlTable[]
 }
 
-/**
- * Reads the small subset of TOML that `mods.toml` uses: top-level keys,
- * `[[mods]]` array-of-tables and `[[dependencies.x]]` blocks, with basic and
- * multi-line basic strings.
- */
+
+
+
+
+
 function parseModsToml(text: string): { top: Record<string, string>; mods: Record<string, string>[]; dependencies: string[] } {
   const top: Record<string, string> = {}
   const mods: Record<string, string>[] = []
@@ -62,7 +62,7 @@ function parseModsToml(text: string): { top: Record<string, string>; mods: Recor
     const key = pair[1]
     let raw = pair[2].trim()
 
-    // Multi-line basic string.
+
     if (raw.startsWith('"""')) {
       let value = raw.slice(3)
       if (value.endsWith('"""') && value.length >= 3) {
@@ -96,9 +96,9 @@ function parseModsToml(text: string): { top: Record<string, string>; mods: Recor
   return { top, mods, dependencies }
 }
 
-/* ------------------------------------------------------------------ */
-/* Helpers                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function toDataUrl(buffer: Buffer, fileName: string): string {
   const extension = fileName.split('.').pop()?.toLowerCase()
@@ -124,7 +124,7 @@ function parseManifest(buffer: Buffer | undefined): Record<string, string> {
   return out
 }
 
-/** Forge mods commonly declare `${file.jarVersion}`, resolved from the manifest. */
+
 function resolveVersionPlaceholder(version: string | undefined, manifest: Record<string, string>): string | null {
   if (!version) return null
   if (!version.includes('${')) return version
@@ -152,9 +152,9 @@ function normalizeAuthors(value: unknown): string[] {
   return []
 }
 
-/* ------------------------------------------------------------------ */
-/* Entry point                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 const INTERESTING = new Set([
   'fabric.mod.json',
@@ -190,7 +190,7 @@ export async function readModMetadata(jarPath: string): Promise<ModMetadata> {
   let iconPath: string | null = null
   const result: ModMetadata = { ...fallback }
 
-  /* --- Fabric --- */
+
   const fabricRaw = entries.get('fabric.mod.json')
   if (fabricRaw) {
     try {
@@ -214,11 +214,11 @@ export async function readModMetadata(jarPath: string): Promise<ModMetadata> {
         else if (Array.isArray(mc)) result.gameVersions = mc.filter((v): v is string => typeof v === 'string')
       }
     } catch {
-      /* malformed metadata falls back to the file name */
+
     }
   }
 
-  /* --- Quilt --- */
+
   const quiltRaw = entries.get('quilt.mod.json')
   if (quiltRaw) {
     try {
@@ -234,11 +234,11 @@ export async function readModMetadata(jarPath: string): Promise<ModMetadata> {
       if (contributors) result.authors = Object.keys(contributors)
       iconPath = typeof meta?.icon === 'string' ? (meta.icon as string) : iconPath
     } catch {
-      /* ignore */
+
     }
   }
 
-  /* --- Forge / NeoForge (1.13+) --- */
+
   const tomlRaw = entries.get('META-INF/neoforge.mods.toml') ?? entries.get('META-INF/mods.toml')
   if (tomlRaw) {
     try {
@@ -256,11 +256,11 @@ export async function readModMetadata(jarPath: string): Promise<ModMetadata> {
         (id) => id !== 'minecraft' && id !== 'forge' && id !== 'neoforge'
       )
     } catch {
-      /* ignore */
+
     }
   }
 
-  /* --- Forge (legacy, <= 1.12.2) --- */
+
   const legacyRaw = entries.get('mcmod.info')
   if (legacyRaw && !tomlRaw) {
     try {
@@ -279,18 +279,18 @@ export async function readModMetadata(jarPath: string): Promise<ModMetadata> {
       iconPath = (first.logoFile as string) || iconPath
       if (typeof first.mcversion === 'string') result.gameVersions = [first.mcversion]
     } catch {
-      /* ignore */
+
     }
   }
 
-  /* --- Icon --- */
+
   if (iconPath) {
     const normalized = iconPath.replace(/^\//, '')
     try {
       const found = await findZipEntry(jarPath, (name) => name === normalized)
       if (found) result.iconDataUrl = toDataUrl(found.buffer, found.fileName)
     } catch {
-      /* icons are optional */
+
     }
   }
 
@@ -299,9 +299,9 @@ export async function readModMetadata(jarPath: string): Promise<ModMetadata> {
   return result
 }
 
-/* ------------------------------------------------------------------ */
-/* Packs                                                               */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export interface PackMetadata {
   description: string | null
@@ -361,7 +361,7 @@ export async function readPackMetadata(archivePath: string): Promise<PackMetadat
     const icon = entries.get('pack.png')
     if (icon) result.iconDataUrl = toDataUrl(icon, 'pack.png')
   } catch {
-    /* not a valid pack archive; the caller falls back to the file name */
+
   }
 
   return result

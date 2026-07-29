@@ -23,7 +23,7 @@ export function formatCount(value: number): string {
   return String(value)
 }
 
-/** "3h 42m", "12m", "just under a minute" */
+
 export function formatDuration(ms: number, style: 'short' | 'long' = 'short'): string {
   if (!ms || ms < 0) return style === 'short' ? '0m' : 'never'
   const minutes = Math.floor(ms / 60_000)
@@ -110,7 +110,7 @@ export const LOADER_NAME: Record<LoaderType, string> = {
   neoforge: 'NeoForge'
 }
 
-/** Forge encodes the game version in its own; hide that noise in the UI. */
+
 export function shortLoaderVersion(
   loader: LoaderType,
   minecraftVersion: string,
@@ -137,7 +137,7 @@ export const DIFFICULTIES: Record<number, string> = {
   3: 'Hard'
 }
 
-/** Deterministic pastel pair used for generated instance artwork. */
+
 export function artworkColors(seed: string): { a: string; b: string } {
   let hash = 0
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
@@ -160,7 +160,7 @@ export function pluralize(count: number, singular: string, plural?: string): str
   return `${count.toLocaleString()} ${count === 1 ? singular : (plural ?? `${singular}s`)}`
 }
 
-/** Case-insensitive subsequence match used by the instance filter. */
+
 export function fuzzyMatch(haystack: string, needle: string): boolean {
   if (!needle) return true
   const target = haystack.toLowerCase()

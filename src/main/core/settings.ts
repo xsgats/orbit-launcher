@@ -8,7 +8,7 @@ import { paths } from './paths'
 
 function defaultMaxMemory(): number {
   const totalMb = Math.floor(totalmem() / (1024 * 1024))
-  // Leave the OS room to breathe; cap the default so modpacks still get plenty.
+
   if (totalMb >= 32_000) return 8192
   if (totalMb >= 16_000) return 6144
   if (totalMb >= 12_000) return 4096
@@ -16,26 +16,26 @@ function defaultMaxMemory(): number {
   return 2048
 }
 
-/**
- * Injected by the bundler from build-time environment variables. Empty in a
- * plain `npm run build`, which leaves Orbit in bring-your-own-credentials mode.
- */
+
+
+
+
 declare const __ORBIT_MSA_CLIENT_ID__: string
 declare const __ORBIT_CURSEFORGE_API_KEY__: string
 
-/**
- * Orbit's own Azure application registration.
- *
- * This is a public identifier, not a secret: the OAuth flow is a public client
- * secured by PKCE, and Microsoft expects desktop apps to ship their client id
- * in the binary. There is deliberately no client secret anywhere in Orbit.
- */
+
+
+
+
+
+
+
 const ORBIT_MSA_CLIENT_ID = 'abb4f9d6-d842-462b-b755-e0f69fa2c81d'
 
 const BUILT_IN_MSA_CLIENT_ID =
   (typeof __ORBIT_MSA_CLIENT_ID__ === 'string' ? __ORBIT_MSA_CLIENT_ID__ : '') || ORBIT_MSA_CLIENT_ID
 
-/** No key is shipped: CurseForge keys are secrets and must not be redistributed. */
+
 const BUILT_IN_CURSEFORGE_KEY =
   typeof __ORBIT_CURSEFORGE_API_KEY__ === 'string' ? __ORBIT_CURSEFORGE_API_KEY__ : ''
 
@@ -76,8 +76,8 @@ function createDefaults(): AppSettings {
     javaDir: paths.javaDir,
     sharedDir: paths.sharedDir,
 
-    // Runtime environment wins over the baked-in value, so a single build can
-    // still be pointed at a different registration for testing.
+
+
     curseforgeApiKey: process.env.ORBIT_CURSEFORGE_API_KEY || BUILT_IN_CURSEFORGE_KEY,
     enableModrinth: true,
     enableCurseForge: true,
@@ -107,12 +107,12 @@ class SettingsStore {
     const defaults = createDefaults()
     this.current = { ...defaults, ...(stored ?? {}) }
 
-    // A blank value saved by an older build must not shadow a newer built-in
-    // default — otherwise upgrading would never pick up a shipped client id.
+
+
     if (!this.current.msaClientId.trim()) this.current.msaClientId = defaults.msaClientId
 
-    // A user-relocated library root wins over the default layout, unless an
-    // explicit ORBIT_DATA_ROOT is pinning the location.
+
+
     if (!process.env.ORBIT_DATA_ROOT && stored?.dataRoot && stored.dataRoot !== defaults.dataRoot) {
       paths.setRoot(stored.dataRoot)
       this.current.instancesDir = paths.instancesDir

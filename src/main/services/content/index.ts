@@ -43,9 +43,9 @@ const CONTENT_EXTENSIONS: Record<ContentKind, string[]> = {
   world: []
 }
 
-/* ------------------------------------------------------------------ */
-/* Provenance index                                                    */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface ProvenanceEntry {
   provider: ContentProvider
@@ -68,14 +68,14 @@ async function writeProvenance(instance: Instance, index: ProvenanceIndex): Prom
   await writeJson(provenanceFile(instance), index)
 }
 
-/** Provenance is keyed by the enabled file name so toggling never loses it. */
+
 function provenanceKey(fileName: string): string {
   return fileName.toLowerCase().replace(new RegExp(`${DISABLED_SUFFIX}$`, 'i'), '')
 }
 
-/* ------------------------------------------------------------------ */
-/* Metadata cache                                                      */
-/* ------------------------------------------------------------------ */
+
+
+
 
 interface CacheEntry {
   key: string
@@ -98,9 +98,9 @@ async function cachedHash(path: string, size: number, mtime: number): Promise<st
   }
 }
 
-/* ------------------------------------------------------------------ */
-/* Listing                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function contentDir(instance: Instance, kind: ContentKind): string {
   return join(instances.gameDir(instance), CONTENT_DIRS[kind])
@@ -125,7 +125,7 @@ export async function listContent(instanceId: string, kind: ContentKind): Promis
     const bare = enabled ? fileName : fileName.slice(0, -DISABLED_SUFFIX.length)
     const extension = extname(bare).toLowerCase()
 
-    // Packs may be plain folders; mods must be jars.
+
     const isFolderPack = entry.isDirectory() && kind !== 'mod'
     if (!isFolderPack && (!entry.isFile() || (extensions.length && !extensions.includes(extension)))) continue
 
@@ -202,9 +202,9 @@ export async function listContent(instanceId: string, kind: ContentKind): Promis
   return out.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
 }
 
-/* ------------------------------------------------------------------ */
-/* Mutations                                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export async function setEnabled(
   instanceId: string,
@@ -272,9 +272,9 @@ export async function addFromFiles(
   return listContent(instanceId, kind)
 }
 
-/* ------------------------------------------------------------------ */
-/* Installing from the store                                           */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export async function recordInstall(
   instance: Instance,
@@ -286,7 +286,7 @@ export async function recordInstall(
   await writeProvenance(instance, provenance)
 }
 
-/** Removes any older file previously installed for the same project. */
+
 export async function removePreviousVersion(
   instance: Instance,
   kind: ContentKind,
@@ -318,9 +318,9 @@ export function directoryFor(instance: Instance, kind: ContentKind): string {
   return contentDir(instance, kind)
 }
 
-/* ------------------------------------------------------------------ */
-/* Update checking                                                     */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function versionToUpdate(version: StoreVersion): NonNullable<LocalContent['update']> {
   const file = version.files.find((f) => f.primary) ?? version.files[0]
@@ -342,7 +342,7 @@ export async function checkUpdates(instanceId: string, kind: ContentKind): Promi
   const loaders: LoaderType[] = kind === 'mod' && instance.loader !== 'vanilla' ? [instance.loader] : []
   const gameVersions = [instance.minecraftVersion]
 
-  /* --- Modrinth: hash-based, covers files Orbit did not install --- */
+
   const hashes = items.map((item) => item.sha1).filter((hash): hash is string => Boolean(hash))
   if (hashes.length) {
     try {
@@ -367,7 +367,7 @@ export async function checkUpdates(instanceId: string, kind: ContentKind): Promi
     }
   }
 
-  /* --- CurseForge: metadata-based, for files Orbit installed --- */
+
   if (curseforge.isConfigured()) {
     const pending = items.filter((item) => item.provider === 'curseforge' && item.projectId && !item.update)
     for (const item of pending) {
@@ -387,9 +387,9 @@ export async function checkUpdates(instanceId: string, kind: ContentKind): Promi
   return items
 }
 
-/* ------------------------------------------------------------------ */
-/* Worlds                                                              */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export async function listWorlds(instanceId: string): Promise<WorldInfo[]> {
   const instance = await instances.require(instanceId)
@@ -443,7 +443,7 @@ export async function listWorlds(instanceId: string): Promise<WorldInfo[]> {
       try {
         world.iconDataUrl = `data:image/png;base64,${(await readFile(icon)).toString('base64')}`
       } catch {
-        /* optional */
+
       }
     }
 
@@ -496,7 +496,7 @@ export async function importWorld(instanceId: string, sourcePath: string): Promi
   await tasks.run({ title: 'Importing world', kind: 'import', instanceId }, async (task) => {
     const entries = await listZipEntries(sourcePath)
 
-    // A world zip may or may not include a wrapping folder.
+
     const hasRootLevelDat = entries.some((entry) => entry.fileName === 'level.dat')
     const rootFolder = entries.find((entry) => /^[^/]+\/level\.dat$/.test(entry.fileName))?.fileName.split('/')[0]
 
@@ -525,9 +525,9 @@ export async function importWorld(instanceId: string, sourcePath: string): Promi
   return listWorlds(instanceId)
 }
 
-/* ------------------------------------------------------------------ */
-/* Screenshots                                                         */
-/* ------------------------------------------------------------------ */
+
+
+
 
 function pngDimensions(buffer: Buffer): { width: number; height: number } | null {
   if (buffer.length < 24) return null
@@ -561,7 +561,7 @@ export async function listScreenshots(instanceId: string): Promise<ScreenshotInf
         width = dimensions?.width ?? null
         height = dimensions?.height ?? null
       } catch {
-        /* dimensions are decorative */
+
       }
     }
 
@@ -599,9 +599,9 @@ export async function revealScreenshot(instanceId: string, id: string): Promise<
   shell.showItemInFolder(join(instances.gameDir(instance), 'screenshots', id))
 }
 
-/* ------------------------------------------------------------------ */
-/* Servers                                                             */
-/* ------------------------------------------------------------------ */
+
+
+
 
 export async function listServers(instanceId: string): Promise<ServerInfo[]> {
   const instance = await instances.require(instanceId)
