@@ -1,0 +1,52 @@
+{
+  "name": "orbit-launcher",
+  "productName": "Orbit Launcher",
+  "version": "1.0.0",
+  "description": "A next-generation Minecraft launcher for Windows.",
+  "author": {
+    "name": "Orbit",
+    "email": "hello@orbitlauncher.app"
+  },
+  "homepage": "https://orbitlauncher.app",
+  "license": "GPL-3.0-or-later",
+  "private": true,
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "start": "electron-vite preview",
+    "build": "electron-vite build",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "icons": "node scripts/generate-icons.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
+    "dist": "npm run build && electron-builder --win --publish never && npm run verify:package",
+    "dist:dir": "npm run build && electron-builder --win --dir --publish never && npm run verify:package"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "archiver-utils": "^5.0.2",
+    "electron-updater": "^6.6.2",
+    "yauzl": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.3",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@types/yauzl": "^2.10.3",
+    "@vitejs/plugin-react": "^4.4.1",
+    "electron": "^35.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^3.1.0",
+    "framer-motion": "^12.9.2",
+    "lucide-react": "^0.503.0",
+    "png-to-ico": "^2.1.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sharp": "^0.34.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.3",
+    "zustand": "^5.0.3"
+  }
+}

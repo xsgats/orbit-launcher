@@ -1,0 +1,185 @@
+/* ==================================================================
+   Orbit Launcher — design tokens
+   One accent, three surface depths, a strict type ramp.
+   ================================================================== */
+
+:root {
+  /* Accent — overwritten at runtime from user settings */
+  --accent: #6c7bff;
+  --accent-hover: #8290ff;
+  --accent-press: #5a68e6;
+  --accent-contrast: #ffffff;
+  --accent-a08: rgb(108 123 255 / 8%);
+  --accent-a14: rgb(108 123 255 / 14%);
+  --accent-a24: rgb(108 123 255 / 24%);
+  --accent-a40: rgb(108 123 255 / 40%);
+  --accent-glow: rgb(108 123 255 / 32%);
+
+  /* Brand secondaries — used for gradients and loader identity */
+  --cyan: #35e0f0;
+  --violet: #b15cff;
+  --pink: #ff6ba8;
+
+  /* Semantic */
+  --success: #37d399;
+  --success-a14: rgb(55 211 153 / 14%);
+  --warning: #ffb84d;
+  --warning-a14: rgb(255 184 77 / 14%);
+  --danger: #ff6b7a;
+  --danger-a14: rgb(255 107 122 / 14%);
+  --danger-a24: rgb(255 107 122 / 24%);
+  --info: #58b6ff;
+
+  /* Loader identity colours */
+  --loader-vanilla: #8fb45b;
+  --loader-fabric: #c8ab6b;
+  --loader-quilt: #b47bd6;
+  --loader-forge: #6e8bb5;
+  --loader-neoforge: #e08a4a;
+
+  /* Radii */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-2xl: 32px;
+  --r-full: 999px;
+
+  /* Spacing ramp */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 32px;
+  --s-8: 40px;
+  --s-9: 56px;
+  --s-10: 72px;
+
+  /* Type */
+  --font-ui:
+    'Segoe UI Variable Display', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system,
+    'Inter', sans-serif;
+  --font-mono: 'Cascadia Code', 'Cascadia Mono', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+
+  --t-display: 700 30px/1.12 var(--font-ui);
+  --t-h1: 650 23px/1.2 var(--font-ui);
+  --t-h2: 640 17px/1.3 var(--font-ui);
+  --t-h3: 640 14px/1.35 var(--font-ui);
+  --t-body: 420 13.5px/1.55 var(--font-ui);
+  --t-small: 450 12.5px/1.45 var(--font-ui);
+  --t-tiny: 560 11px/1.35 var(--font-ui);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --d-fast: 130ms;
+  --d-base: 200ms;
+  --d-slow: 340ms;
+
+  /* Layout */
+  --titlebar-h: 46px;
+  --sidebar-w: 244px;
+  --sidebar-w-collapsed: 74px;
+  --page-max: 1360px;
+
+  color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------
+   Dark (default)
+   ------------------------------------------------------------------ */
+:root,
+[data-theme='dark'] {
+  --bg-base: #07080e;
+  --bg-canvas: #0a0b14;
+  --bg-elevated: #10121d;
+
+  --surface-1: rgb(255 255 255 / 3%);
+  --surface-2: rgb(255 255 255 / 5.5%);
+  --surface-3: rgb(255 255 255 / 8.5%);
+  --surface-inset: rgb(0 0 0 / 22%);
+
+  --border-subtle: rgb(255 255 255 / 5%);
+  --border: rgb(255 255 255 / 8.5%);
+  --border-strong: rgb(255 255 255 / 15%);
+
+  --text-primary: #eef0fa;
+  --text-secondary: #a6acc8;
+  --text-tertiary: #6f7695;
+  --text-inverse: #0a0b14;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%), 0 2px 8px rgb(0 0 0 / 18%);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 32%), 0 12px 32px rgb(0 0 0 / 26%);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 40%), 0 32px 80px rgb(0 0 0 / 38%);
+  --shadow-glow: 0 8px 32px var(--accent-glow);
+
+  --aurora-1: rgb(108 123 255 / 20%);
+  --aurora-2: rgb(53 224 240 / 11%);
+  --aurora-3: rgb(177 92 255 / 13%);
+  --scrim: rgb(4 5 10 / 72%);
+}
+
+/* ------------------------------------------------------------------
+   Midnight — deeper, higher contrast, for OLED
+   ------------------------------------------------------------------ */
+[data-theme='midnight'] {
+  --bg-base: #000000;
+  --bg-canvas: #04050a;
+  --bg-elevated: #0a0c14;
+
+  --surface-1: rgb(255 255 255 / 4%);
+  --surface-2: rgb(255 255 255 / 6.5%);
+  --surface-3: rgb(255 255 255 / 10%);
+  --surface-inset: rgb(0 0 0 / 40%);
+
+  --border-subtle: rgb(255 255 255 / 6%);
+  --border: rgb(255 255 255 / 10%);
+  --border-strong: rgb(255 255 255 / 18%);
+
+  --text-primary: #f4f6ff;
+  --text-secondary: #aeb4d0;
+  --text-tertiary: #767d9e;
+
+  --aurora-1: rgb(108 123 255 / 14%);
+  --aurora-2: rgb(53 224 240 / 7%);
+  --aurora-3: rgb(177 92 255 / 9%);
+  --scrim: rgb(0 0 0 / 80%);
+}
+
+/* ------------------------------------------------------------------
+   Light
+   ------------------------------------------------------------------ */
+[data-theme='light'] {
+  --bg-base: #eef0f7;
+  --bg-canvas: #f6f7fb;
+  --bg-elevated: #ffffff;
+
+  --surface-1: rgb(255 255 255 / 72%);
+  --surface-2: rgb(255 255 255 / 92%);
+  --surface-3: rgb(15 20 45 / 5%);
+  --surface-inset: rgb(15 20 45 / 4%);
+
+  --border-subtle: rgb(15 20 45 / 6%);
+  --border: rgb(15 20 45 / 10%);
+  --border-strong: rgb(15 20 45 / 18%);
+
+  --text-primary: #10142b;
+  --text-secondary: #4d5478;
+  --text-tertiary: #7b82a3;
+  --text-inverse: #ffffff;
+
+  --shadow-sm: 0 1px 2px rgb(15 20 45 / 6%), 0 2px 8px rgb(15 20 45 / 5%);
+  --shadow-md: 0 4px 12px rgb(15 20 45 / 8%), 0 12px 32px rgb(15 20 45 / 7%);
+  --shadow-lg: 0 12px 32px rgb(15 20 45 / 12%), 0 32px 80px rgb(15 20 45 / 10%);
+
+  --aurora-1: rgb(108 123 255 / 16%);
+  --aurora-2: rgb(53 224 240 / 12%);
+  --aurora-3: rgb(177 92 255 / 12%);
+  --scrim: rgb(240 242 250 / 70%);
+
+  color-scheme: light;
+}

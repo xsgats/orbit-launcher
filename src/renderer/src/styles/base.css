@@ -1,0 +1,261 @@
+/* ==================================================================
+   Reset + base typography + shared primitives
+   ================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font: var(--t-body);
+  color: var(--text-primary);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+}
+
+input,
+textarea,
+[contenteditable],
+.selectable {
+  user-select: text;
+  cursor: text;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: inherit;
+  letter-spacing: -0.014em;
+}
+
+::selection {
+  background: var(--accent-a40);
+  color: var(--text-primary);
+}
+
+/* ------------------------------------------------------------------
+   Focus — visible only for keyboard users
+   ------------------------------------------------------------------ */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+/* ------------------------------------------------------------------
+   Scrollbars
+   ------------------------------------------------------------------ */
+*::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: var(--r-full);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ------------------------------------------------------------------
+   Type utilities
+   ------------------------------------------------------------------ */
+.t-display {
+  font: var(--t-display);
+  letter-spacing: -0.026em;
+}
+.t-h1 {
+  font: var(--t-h1);
+  letter-spacing: -0.02em;
+}
+.t-h2 {
+  font: var(--t-h2);
+  letter-spacing: -0.014em;
+}
+.t-h3 {
+  font: var(--t-h3);
+  letter-spacing: -0.008em;
+}
+.t-body {
+  font: var(--t-body);
+}
+.t-small {
+  font: var(--t-small);
+}
+.t-tiny {
+  font: var(--t-tiny);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.t-mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-ligatures: none;
+}
+
+.dim {
+  color: var(--text-secondary);
+}
+.dimmer {
+  color: var(--text-tertiary);
+}
+.nums {
+  font-variant-numeric: tabular-nums;
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------
+   Layout utilities
+   ------------------------------------------------------------------ */
+.row {
+  display: flex;
+  align-items: center;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+}
+.between {
+  justify-content: space-between;
+}
+.center {
+  justify-content: center;
+  align-items: center;
+}
+.wrap {
+  flex-wrap: wrap;
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.gap-1 {
+  gap: var(--s-1);
+}
+.gap-2 {
+  gap: var(--s-2);
+}
+.gap-3 {
+  gap: var(--s-3);
+}
+.gap-4 {
+  gap: var(--s-4);
+}
+.gap-5 {
+  gap: var(--s-5);
+}
+.gap-6 {
+  gap: var(--s-6);
+}
+.gap-7 {
+  gap: var(--s-7);
+}
+
+/* ------------------------------------------------------------------
+   Reduced motion
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+[data-reduce-motion='true'] *,
+[data-reduce-motion='true'] *::before,
+[data-reduce-motion='true'] *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}

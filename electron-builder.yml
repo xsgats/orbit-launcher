@@ -1,0 +1,75 @@
+appId: app.orbitlauncher.desktop
+productName: Orbit Launcher
+copyright: Copyright © 2026 Orbit Launcher
+
+directories:
+  buildResources: build
+  output: release/${version}
+
+# Keep this list conservative. Pruning inside node_modules is not worth the
+# risk: an over-eager glob silently removed archiver's dependency tree once and
+# the app failed to start with no usable error.
+files:
+  - out/**/*
+  - package.json
+  - '!**/*.map'
+
+extraResources:
+  - from: resources
+    to: .
+    filter:
+      - '**/*'
+
+asar: true
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: OrbitLauncher-Setup-${version}.${ext}
+  # Windows shows this in the UAC prompt and file properties.
+  legalTrademarks: Not affiliated with Mojang Studios or Microsoft
+  fileAssociations:
+    - ext: orbitpack
+      name: Orbit instance
+      description: Orbit Launcher instance export
+      icon: build/icon.ico
+      role: Editor
+    - ext: mrpack
+      name: Modrinth modpack
+      description: Modrinth modpack archive
+      icon: build/icon.ico
+      role: Editor
+  protocols:
+    - name: Orbit Launcher
+      schemes: [orbit]
+
+nsis:
+  # Per-user by default so no admin prompt is needed, with a machine-wide option.
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Orbit Launcher
+  menuCategory: false
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  uninstallDisplayName: Orbit Launcher ${version}
+  displayLanguageSelector: false
+  include: build/installer.nsh
+
+# Auto-update feed. Point `url` at wherever the release artefacts are hosted;
+# electron-updater reads latest.yml from the same location.
+publish:
+  - provider: generic
+    url: https://releases.orbitlauncher.app/win32-x64
+    channel: latest
+
+compression: maximum
+removePackageScripts: true

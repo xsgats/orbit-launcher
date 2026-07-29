@@ -1,0 +1,14 @@
+node_modules/
+out/
+dist/
+release/
+.claude/
+
+# Never commit build credentials.
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.vite/
+*.tsbuildinfo

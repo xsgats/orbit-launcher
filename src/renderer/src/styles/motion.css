@@ -1,0 +1,101 @@
+/* Small, reusable animations shared across the app. */
+
+@keyframes orbit-float {
+  from {
+    transform: translateY(-5px);
+  }
+  to {
+    transform: translateY(5px);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+/* Boot splash ------------------------------------------------------- */
+.boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg-base);
+  z-index: 400;
+}
+
+.boot__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-5);
+  animation: fade-up 0.5s var(--ease-out);
+}
+
+.boot__wordmark {
+  font: 640 15px/1 var(--font-ui);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.boot__bar {
+  width: 168px;
+  height: 3px;
+  border-radius: var(--r-full);
+  background: var(--surface-3);
+  overflow: hidden;
+  position: relative;
+}
+
+.boot__bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: var(--r-full);
+  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  animation: indeterminate 1.3s var(--ease-in-out) infinite;
+}
+
+/* Page transitions --------------------------------------------------- */
+.page-enter {
+  animation: fade-up 0.28s var(--ease-out);
+}
+
+/* Staggered list reveal ---------------------------------------------- */
+.stagger > * {
+  animation: fade-up 0.34s var(--ease-out) backwards;
+}
+
+.stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 26ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 52ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 78ms;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 104ms;
+}
+.stagger > *:nth-child(6) {
+  animation-delay: 130ms;
+}
+.stagger > *:nth-child(n + 7) {
+  animation-delay: 156ms;
+}
