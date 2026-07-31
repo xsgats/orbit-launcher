@@ -110,7 +110,12 @@ class SettingsStore {
 
 
 
+    /*
+     * A blank stored value must never mask a key compiled into the build.
+     * Settings saved before a key existed would otherwise pin it off forever.
+     */
     if (!this.current.msaClientId.trim()) this.current.msaClientId = defaults.msaClientId
+    if (!this.current.curseforgeApiKey.trim()) this.current.curseforgeApiKey = defaults.curseforgeApiKey
 
 
 

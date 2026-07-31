@@ -76,8 +76,25 @@ export function DiscoverPage(): React.JSX.Element {
   const [debounced, setDebounced] = useState(urlQuery)
   const sort = (useQueryParam('sort', 'relevance') || 'relevance') as StoreSort
   const curseforgeAvailable = Boolean(settings?.curseforgeApiKey?.trim())
-  const [providers, setProviders] = useState<ContentProvider[]>(['modrinth'])
+  const [sourceList, setSourceList] = useQueryList('src')
   const [destinationId, setDestinationId] = useState('')
+
+  /*
+   * Sources live in the URL alongside the other filters, so narrowing to one
+   * store survives opening a project and coming back. An empty list means
+   * "everything available", which keeps the address clean in the common case.
+   */
+  const availableProviders = useMemo<ContentProvider[]>(
+    () => (curseforgeAvailable ? ['modrinth', 'curseforge'] : ['modrinth']),
+    [curseforgeAvailable]
+  )
+
+  const providers = useMemo<ContentProvider[]>(() => {
+    const chosen = sourceList.filter((entry): entry is ContentProvider =>
+      availableProviders.includes(entry as ContentProvider)
+    )
+    return chosen.length ? chosen : availableProviders
+  }, [sourceList, availableProviders])
   const [installTarget, setInstallTarget] = useState<InstallTarget | null>(null)
   const [installed, setInstalled] = useState<Set<string>>(new Set())
 
@@ -123,10 +140,6 @@ export function DiscoverPage(): React.JSX.Element {
       loader: picked.loader === 'vanilla' ? null : picked.loader
     })
   }
-
-  useEffect(() => {
-    setProviders(curseforgeAvailable ? ['modrinth', 'curseforge'] : ['modrinth'])
-  }, [curseforgeAvailable])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -224,14 +237,15 @@ export function DiscoverPage(): React.JSX.Element {
   }, [result, hideInstalled, destinationId, installed])
   const hiddenCount = (result?.hits.length ?? 0) - visibleHits.length
 
-  const toggleProvider = (provider: ContentProvider): void =>
-    setProviders((current) =>
-      current.includes(provider)
-        ? current.length > 1
-          ? current.filter((entry) => entry !== provider)
-          : current
-        : [...current, provider]
-    )
+  const toggleProvider = (provider: ContentProvider): void => {
+    const next = providers.includes(provider)
+      ? providers.filter((entry) => entry !== provider)
+      : [...availableProviders.filter((entry) => providers.includes(entry) || entry === provider)]
+
+    // Never let the user filter every source away — there would be nothing to show.
+    if (!next.length) return
+    setSourceList(next.length === availableProviders.length ? [] : next)
+  }
 
   return (
     <div className="page__inner page__inner--wide">

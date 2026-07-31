@@ -24,8 +24,12 @@ function releaseUrlFor(version: string | undefined): string | null {
   return version ? `${RELEASE_PAGE}/v${version}` : null
 }
 
+const CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000
+const FOCUS_CHECK_THROTTLE_MS = 15 * 60 * 1000
+
 let autoUpdater: ElectronUpdater['autoUpdater'] | null = null
 let checkTimer: NodeJS.Timeout | null = null
+let lastCheckAt = 0
 
 function publish(patch: Partial<UpdateState>): void {
   state = { ...state, ...patch }
@@ -123,8 +127,19 @@ export async function initUpdater(): Promise<void> {
   if (config.autoCheckUpdates) {
     setTimeout(() => void check(), 8_000)
 
-    checkTimer = setInterval(() => void check(), 6 * 60 * 60 * 1000)
+    checkTimer = setInterval(() => void check(), CHECK_INTERVAL_MS)
     checkTimer.unref?.()
+
+    /*
+     * A timer alone means someone who leaves Orbit open can sit for hours
+     * without noticing a release. Re-check when they come back to the window,
+     * throttled so alt-tabbing does not hammer the feed.
+     */
+    app.on('browser-window-focus', () => {
+      if (Date.now() - lastCheckAt < FOCUS_CHECK_THROTTLE_MS) return
+      if (state.status === 'downloading' || state.status === 'ready') return
+      void check()
+    })
   }
 }
 
@@ -133,6 +148,7 @@ export async function check(): Promise<UpdateState> {
     publish({ status: app.isPackaged ? 'error' : 'idle', error: app.isPackaged ? 'Updater unavailable' : null })
     return state
   }
+  lastCheckAt = Date.now()
   try {
     await autoUpdater.checkForUpdates()
   } catch (err) {
