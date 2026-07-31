@@ -9,6 +9,7 @@
  *   --notes "text"   release notes (default: commit subjects since the last tag)
  *   --draft          create the release as a draft (clients will NOT see it)
  *   --dry-run        build and report, upload nothing
+ *   --no-git         skip the commit/tag/push step
  *
  * Auth comes from the gh CLI, so no token needs to live in the environment.
  * Uploading latest.yml is what actually delivers the update; the .exe.blockmap
@@ -169,6 +170,30 @@ if (dryRun) {
 }
 
 /* ---------------------------------------------------------------- */
+/* Git                                                              */
+/* ---------------------------------------------------------------- */
+
+/*
+ * Commit and tag before publishing so the release always points at the exact
+ * source the installer was built from. Without this the tag lands on whatever
+ * the default branch happened to be, which is not what shipped.
+ */
+if (!flag('no-git')) {
+  const branch = capture('git rev-parse --abbrev-ref HEAD') || 'main'
+
+  if (capture('git status --porcelain')) {
+    step('Committing changes')
+    run('git add -A')
+    run(`git commit -m "Release ${version}"`)
+  }
+
+  step(`Tagging ${tag} and pushing ${branch}`)
+  run(`git tag ${tag}`)
+  run(`git push origin ${branch}`)
+  run(`git push origin ${tag}`)
+}
+
+/* ---------------------------------------------------------------- */
 /* Publish                                                          */
 /* ---------------------------------------------------------------- */
 
@@ -197,4 +222,3 @@ console.log(
     ? '\n  This is a DRAFT — clients will not see it until you publish it on GitHub.\n'
     : '\n  Clients will pick this up on next launch, or within 6 hours if already open.\n'
 )
-console.log(`  Remember to commit the version bump: git add package.json && git commit -m "Release ${version}"\n`)
