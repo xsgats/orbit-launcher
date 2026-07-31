@@ -146,8 +146,8 @@ async function captureRoutes(window: BrowserWindow, outDir: string): Promise<voi
     log.error('renderer', `Load failed ${code}: ${description}`)
   })
 
-  const routes: [string, string][] = process.env.ORBIT_CAPTURE_ROUTES
-    ? (JSON.parse(process.env.ORBIT_CAPTURE_ROUTES) as [string, string][])
+  const routes: [string, string, string?][] = process.env.ORBIT_CAPTURE_ROUTES
+    ? (JSON.parse(process.env.ORBIT_CAPTURE_ROUTES) as [string, string, string?][])
     : [
         ['/', 'home'],
         ['/instances', 'instances'],
@@ -175,10 +175,14 @@ async function captureRoutes(window: BrowserWindow, outDir: string): Promise<voi
   log.info('capture', `DOM: ${domReport}`)
 
   for (const entry of routes) {
-    const [route, name] = entry
+    const [route, name, script] = entry
     try {
       await window.webContents.executeJavaScript(`window.location.hash = ${JSON.stringify(route)}`)
       await wait(1_600)
+      if (script) {
+        await window.webContents.executeJavaScript(script)
+        await wait(1_200)
+      }
       const image = await window.webContents.capturePage()
       await writeFile(join(outDir, `${name}.png`), image.toPNG())
       log.info('capture', `Wrote ${name}.png (${image.getSize().width}x${image.getSize().height})`)

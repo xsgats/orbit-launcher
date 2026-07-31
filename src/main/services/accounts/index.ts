@@ -45,9 +45,22 @@ function unseal(secret: StoredSecret | undefined): string {
   }
 }
 
+/**
+ * Mojang hands out texture URLs over plain http. The renderer's CSP only
+ * permits https for images, and textures.minecraft.net serves both, so upgrade
+ * the scheme at the single point where accounts cross into the renderer.
+ */
+function httpsTexture(url: string): string {
+  return url.startsWith('http://') ? `https://${url.slice('http://'.length)}` : url
+}
+
 function toPublic(stored: StoredAccount): Account {
   const { minecraftAccessToken: _a, msaRefreshToken: _b, ...rest } = stored
-  return rest
+  return {
+    ...rest,
+    skins: (rest.skins ?? []).map((skin) => ({ ...skin, url: httpsTexture(skin.url) })),
+    capes: (rest.capes ?? []).map((cape) => ({ ...cape, url: httpsTexture(cape.url) }))
+  }
 }
 
 
@@ -203,6 +216,16 @@ class AccountStore {
     return { account: toPublic(account), accessToken }
   }
 
+
+  /** Writes freshly fetched skin/cape state back onto a stored account. */
+  async applyProfile(id: string, skins: Account['skins'], capes: Account['capes']): Promise<Account> {
+    const account = this.find(id)
+    if (!account) throw new Error('That account is no longer signed in.')
+    account.skins = skins
+    account.capes = capes
+    await this.persist()
+    return toPublic(account)
+  }
 
   async refreshExpiringInBackground(): Promise<void> {
     const soon = Date.now() + 30 * 60 * 1000

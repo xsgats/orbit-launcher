@@ -48,11 +48,32 @@ export interface SkinInfo {
   state: string
 }
 
+export interface SkinChangeResult {
+  account: Account
+  message: string
+}
+
 export interface CapeInfo {
   id: string
   url: string
   alias: string
   state: string
+}
+
+export type SkinVariant = 'CLASSIC' | 'SLIM'
+
+/** A skin saved locally so it can be re-applied to any account later. */
+export interface SkinLibraryEntry {
+  id: string
+  name: string
+  variant: SkinVariant
+  /** Absolute path on disk. */
+  path: string
+  /** orbit-media URL for rendering in the UI. */
+  url: string
+  addedAt: number
+  width: number
+  height: number
 }
 
 export interface Account {
@@ -550,6 +571,7 @@ export interface AppSettings {
   uiScale: number
   instanceCardSize: 'compact' | 'regular' | 'large'
   showInstanceBackgrounds: boolean
+  showAdPlaceholders: boolean
 
 
   memoryMinMb: number
@@ -617,6 +639,8 @@ export interface UpdateState {
   progress: number
   error: string | null
   currentVersion: string
+
+  releaseUrl: string | null
 }
 
 

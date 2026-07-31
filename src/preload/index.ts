@@ -30,6 +30,20 @@ const api = {
   ]),
   settings: group('settings', ['get', 'update', 'reset', 'openDataFolder']),
   accounts: group('accounts', ['list', 'getActive', 'add', 'remove', 'setActive', 'refresh', 'cancelLogin']),
+  skins: group('skins', [
+    'refresh',
+    'upload',
+    'reset',
+    'setCape',
+    'activeUrl',
+    'library',
+    'addToLibrary',
+    'saveCurrentToLibrary',
+    'removeFromLibrary',
+    'renameInLibrary',
+    'applyFromLibrary',
+    'openLibraryFolder'
+  ]),
   java: group('java', ['list', 'scan', 'addManual', 'remove', 'downloadable', 'install', 'test', 'recommendedFor']),
   versions: group('versions', ['minecraft', 'loader', 'loaderSupportedMinecraft']),
   instances: group('instances', [
@@ -85,6 +99,7 @@ const api = {
     'versions',
     'categories',
     'install',
+    'recommendedVersion',
     'installModpack',
     'updateModpack',
     'featured'

@@ -2,35 +2,25 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Clock3, Play, Square, Star, Timer } from 'lucide-react'
 import type { InstanceStatus, InstanceSummary } from '@shared/types'
-import { LOADER_NAME, artworkColors, formatPlaytime, formatRelative, shortLoaderVersion } from '../lib/format'
+import {
+  LOADER_NAME,
+  artworkColors,
+  formatPlaytime,
+  formatRelative,
+  letterTileColors,
+  shortLoaderVersion
+} from '../lib/format'
 import { api, useOrbit } from '../state/store'
-import { Logo } from './Logo'
 import { Progress, Tooltip } from './ui'
 
 
 
 
 
-export const PRESET_ICON_GLYPHS: Record<string, string> = {
-  orbit: '',
-  grass: '🌱',
-  stone: '🪨',
-  diamond: '💎',
-  emerald: '🟩',
-  gold: '🥇',
-  redstone: '🔴',
-  lapis: '🔷',
-  netherite: '⬛',
-  amethyst: '🟣',
-  enderpearl: '🟢',
-  creeper: '🧟',
-  flame: '🔥',
-  anvil: '⚒️',
-  chest: '🧰',
-  compass: '🧭'
+export function instanceInitial(name: string): string {
+  const first = [...name.trim()].find((character) => /[\p{L}\p{N}]/u.test(character))
+  return (first ?? '?').toUpperCase()
 }
-
-export const PRESET_ICON_KEYS = Object.keys(PRESET_ICON_GLYPHS)
 
 
 export function useInstanceImages(instance: InstanceSummary): {
@@ -81,17 +71,38 @@ export function InstanceIcon({
   size?: number
   className?: string
 }): React.JSX.Element {
-  const glyph = instance.icon.type === 'preset' ? PRESET_ICON_GLYPHS[instance.icon.key] : undefined
-
   return (
-    <div className={className} style={{ width: size, height: size, fontSize: size * 0.46 }}>
+    <div className={className} style={{ width: size, height: size }}>
       {iconUrl ? (
         <img src={iconUrl} alt="" />
-      ) : glyph ? (
-        <span>{glyph}</span>
       ) : (
-        <Logo size={size * 0.72} glow={false} />
+        <LetterTile name={instance.name} seed={instance.id + instance.name} size={size} />
       )}
+    </div>
+  )
+}
+
+export function LetterTile({
+  name,
+  seed,
+  size = 52
+}: {
+  name: string
+  seed?: string
+  size?: number
+}): React.JSX.Element {
+  const art = letterTileColors(seed ?? name)
+  return (
+    <div
+      className="icon-tile"
+      style={{
+        width: '100%',
+        height: '100%',
+        fontSize: Math.round(size * 0.42),
+        background: `linear-gradient(145deg, ${art.from}, ${art.to})`
+      }}
+    >
+      {instanceInitial(name)}
     </div>
   )
 }

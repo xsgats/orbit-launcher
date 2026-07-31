@@ -29,7 +29,9 @@ import type {
   TaskInfo,
   UpdateState,
   WorldInfo,
-  ContentProvider
+  ContentProvider,
+  SkinLibraryEntry,
+  SkinVariant
 } from './types'
 
 
@@ -77,6 +79,13 @@ export interface InstallVersionRequest {
   withDependencies: boolean
 }
 
+export interface QuickInstallRequest {
+  instanceId: string
+  provider: ContentProvider
+  projectId: string
+  kind: ContentKind
+}
+
 export interface OrbitApi {
   app: {
     getSystemInfo(): Promise<SystemInfo>
@@ -110,6 +119,22 @@ export interface OrbitApi {
     setActive(id: string): Promise<void>
     refresh(id: string): Promise<Account>
     cancelLogin(): Promise<void>
+  }
+
+  skins: {
+    /** Re-reads skins and capes from Mojang for this account. */
+    refresh(accountId: string): Promise<Account>
+    upload(accountId: string, filePath: string, variant: SkinVariant): Promise<Account>
+    reset(accountId: string): Promise<Account>
+    setCape(accountId: string, capeId: string | null): Promise<Account>
+    activeUrl(accountId: string): Promise<string | null>
+    library(): Promise<SkinLibraryEntry[]>
+    addToLibrary(filePath: string, name: string, variant: SkinVariant): Promise<SkinLibraryEntry[]>
+    saveCurrentToLibrary(accountId: string, name: string): Promise<SkinLibraryEntry[]>
+    removeFromLibrary(id: string): Promise<SkinLibraryEntry[]>
+    renameInLibrary(id: string, name: string): Promise<SkinLibraryEntry[]>
+    applyFromLibrary(accountId: string, id: string): Promise<Account>
+    openLibraryFolder(): Promise<void>
   }
 
   java: {
@@ -188,6 +213,13 @@ export interface OrbitApi {
     ): Promise<StoreVersion[]>
     categories(kind: ContentKind): Promise<StoreCategory[]>
     install(req: InstallVersionRequest): Promise<void>
+    /** The version Orbit recommends for an instance, used to preselect. */
+    recommendedVersion(
+      instanceId: string,
+      provider: ContentProvider,
+      projectId: string,
+      kind: ContentKind
+    ): Promise<StoreVersion | null>
     installModpack(
       provider: ContentProvider,
       projectId: string,

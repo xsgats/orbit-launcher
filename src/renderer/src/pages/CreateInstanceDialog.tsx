@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Check, CircleAlert, Loader2, Package, Search, Sparkles } from 'lucide-react'
+import { Check, CircleAlert, ImagePlus, Loader2, Sparkles } from 'lucide-react'
 import type { LoaderType, LoaderVersion, MinecraftVersionType } from '@shared/types'
-import { PRESET_ICON_GLYPHS, PRESET_ICON_KEYS } from '../components/InstanceCard'
-import { Logo } from '../components/Logo'
-import { Button, Callout, Checkbox, Dialog, Segmented, TextField } from '../components/ui'
+import { LetterTile } from '../components/InstanceCard'
+import { Button, Callout, Checkbox, Combobox, Dialog, Segmented, TextField } from '../components/ui'
 import { LOADER_NAME, shortLoaderVersion } from '../lib/format'
 import { navigate } from '../lib/router'
 import { api, reportError, toast, useOrbit } from '../state/store'
@@ -32,13 +31,13 @@ export function CreateInstanceDialog({
   const [name, setName] = useState('')
   const [nameTouched, setNameTouched] = useState(false)
   const [channel, setChannel] = useState<'release' | 'snapshot' | 'old'>('release')
-  const [versionQuery, setVersionQuery] = useState('')
   const [minecraftVersion, setMinecraftVersion] = useState('')
   const [loader, setLoader] = useState<LoaderType>('vanilla')
   const [loaderVersions, setLoaderVersions] = useState<LoaderVersion[] | null>(null)
   const [loaderVersion, setLoaderVersion] = useState<string | null>(null)
   const [supported, setSupported] = useState<Set<string> | null>(null)
-  const [icon, setIcon] = useState('orbit')
+  const [iconPath, setIconPath] = useState<string | null>(null)
+  const [iconPreview, setIconPreview] = useState<string | null>(null)
   const [installNow, setInstallNow] = useState(true)
   const [busy, setBusy] = useState(false)
 
@@ -48,10 +47,10 @@ export function CreateInstanceDialog({
     setName('')
     setNameTouched(false)
     setChannel('release')
-    setVersionQuery('')
     setLoader('vanilla')
     setLoaderVersion(null)
-    setIcon(PRESET_ICON_KEYS[Math.floor(Math.random() * PRESET_ICON_KEYS.length)])
+    setIconPath(null)
+    setIconPreview(null)
     setInstallNow(true)
     const latest = versions.find((version) => version.type === 'release')
     setMinecraftVersion(latest?.id ?? versions[0]?.id ?? '')
@@ -101,18 +100,25 @@ export function CreateInstanceDialog({
     }
   }, [open, loader, minecraftVersion])
 
-  const filteredVersions = useMemo(() => {
-    const query = versionQuery.trim().toLowerCase()
-    return versions
-      .filter((version) => {
-        if (channel === 'release' && version.type !== 'release') return false
-        if (channel === 'snapshot' && version.type !== 'snapshot') return false
-        if (channel === 'old' && version.type !== 'old_beta' && version.type !== 'old_alpha') return false
-        if (query && !version.id.toLowerCase().includes(query)) return false
-        return true
-      })
-      .slice(0, 400)
-  }, [versions, channel, versionQuery])
+  const versionOptions = useMemo(
+    () =>
+      versions
+        .filter((version) => {
+          if (channel === 'release') return version.type === 'release'
+          if (channel === 'snapshot') return version.type === 'snapshot'
+          return version.type === 'old_beta' || version.type === 'old_alpha'
+        })
+        .map((version) => ({
+          value: version.id,
+          label: version.id,
+          hint:
+            loader !== 'vanilla' && supported && !supported.has(version.id)
+              ? `no ${LOADER_NAME[loader]}`
+              : new Date(version.releaseTime).getFullYear().toString(),
+          disabled: loader !== 'vanilla' && Boolean(supported) && !supported!.has(version.id)
+        })),
+    [versions, channel, loader, supported]
+  )
 
   const versionSupported = loader === 'vanilla' || !supported || supported.has(minecraftVersion)
   const suggestedName = useMemo(() => {
@@ -121,6 +127,16 @@ export function CreateInstanceDialog({
   }, [loader, minecraftVersion])
 
   const effectiveName = nameTouched && name.trim() ? name.trim() : suggestedName
+
+  const pickIcon = async (): Promise<void> => {
+    const path = await api.app.pickFile(
+      [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'] }],
+      'Choose an instance image'
+    )
+    if (!path) return
+    setIconPath(path)
+    setIconPreview(await api.app.readImageAsDataUrl(path))
+  }
 
   const create = async (): Promise<void> => {
     if (!effectiveName || !minecraftVersion) return
@@ -132,9 +148,9 @@ export function CreateInstanceDialog({
         minecraftVersion,
         minecraftVersionType: (selected?.type ?? 'release') as MinecraftVersionType,
         loader,
-        loaderVersion,
-        icon: { type: 'preset', key: icon }
+        loaderVersion
       })
+      if (iconPath) await api.instances.setIconFromFile(instance.id, iconPath)
       await refreshInstances()
       onClose()
       toast('Instance created', effectiveName)
@@ -183,16 +199,19 @@ export function CreateInstanceDialog({
               width: 62,
               height: 62,
               borderRadius: 'var(--r-md)',
-              display: 'grid',
-              placeItems: 'center',
-              fontSize: 28,
+              overflow: 'hidden',
               background: 'var(--surface-2)',
               border: '1px solid var(--border)',
               flexShrink: 0
             }}
           >
-            {PRESET_ICON_GLYPHS[icon] || <Logo size={34} glow={false} />}
+            {iconPath ? (
+              <img src={iconPreview ?? undefined} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <LetterTile name={effectiveName || 'New instance'} size={62} />
+            )}
           </div>
+
           <TextField
             className="grow"
             label="Name"
@@ -203,34 +222,30 @@ export function CreateInstanceDialog({
               setNameTouched(true)
             }}
           />
-        </div>
 
-        <div>
-          <div className="filter-group__title">Icon</div>
-          <div className="row wrap gap-2">
-            {PRESET_ICON_KEYS.map((key) => (
-              <button
-                key={key}
-                onClick={() => setIcon(key)}
-                title={key}
-                type="button"
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 'var(--r-sm)',
-                  display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 18,
-                  background: icon === key ? 'var(--accent-a14)' : 'var(--surface-1)',
-                  border: `1px solid ${icon === key ? 'var(--accent)' : 'var(--border-subtle)'}`,
-                  transition: 'all var(--d-fast) var(--ease-out)'
+          <div className="row gap-2">
+            <Button icon={<ImagePlus size={15} />} onClick={() => void pickIcon()}>
+              {iconPath ? 'Change' : 'Choose image'}
+            </Button>
+            {iconPath && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setIconPath(null)
+                  setIconPreview(null)
                 }}
               >
-                {PRESET_ICON_GLYPHS[key] || <Logo size={21} glow={false} />}
-              </button>
-            ))}
+                Remove
+              </Button>
+            )}
           </div>
         </div>
+
+        {!iconPath && (
+          <p className="field__hint" style={{ marginTop: -12 }}>
+            No image chosen — the instance will use the first letter of its name.
+          </p>
+        )}
 
         { }
         <div>
@@ -284,66 +299,16 @@ export function CreateInstanceDialog({
             />
           </div>
 
-          <div className="input" style={{ marginBottom: 10 }}>
-            <span className="input__affix">
-              <Search size={14} />
-            </span>
-            <input
-              value={versionQuery}
-              placeholder="Filter versions…"
-              onChange={(event) => setVersionQuery(event.target.value)}
-            />
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(96px, 1fr))',
-              gap: 6,
-              maxHeight: 186,
-              overflowY: 'auto',
-              padding: 3,
-              borderRadius: 'var(--r-md)',
-              background: 'var(--surface-inset)',
-              border: '1px solid var(--border-subtle)'
-            }}
-          >
-            {filteredVersions.length === 0 && (
-              <div className="dimmer t-small" style={{ gridColumn: '1 / -1', padding: 16, textAlign: 'center' }}>
-                No versions match that filter.
-              </div>
-            )}
-            {filteredVersions.map((version) => {
-              const usable = loader === 'vanilla' || !supported || supported.has(version.id)
-              return (
-                <button
-                  key={version.id}
-                  onClick={() => setMinecraftVersion(version.id)}
-                  disabled={!usable}
-                  title={usable ? version.id : `${LOADER_NAME[loader]} does not support ${version.id}`}
-                  type="button"
-                  style={{
-                    height: 32,
-                    borderRadius: 'var(--r-sm)',
-                    fontSize: 12,
-                    fontWeight: 550,
-                    fontVariantNumeric: 'tabular-nums',
-                    opacity: usable ? 1 : 0.32,
-                    cursor: usable ? 'pointer' : 'not-allowed',
-                    color: minecraftVersion === version.id ? 'var(--accent-contrast)' : 'var(--text-secondary)',
-                    background: minecraftVersion === version.id ? 'var(--accent)' : 'var(--surface-2)',
-                    border: '1px solid var(--border-subtle)',
-                    transition: 'all var(--d-fast) var(--ease-out)'
-                  }}
-                >
-                  {version.id}
-                </button>
-              )
-            })}
-          </div>
+          <Combobox
+            value={minecraftVersion}
+            onChange={setMinecraftVersion}
+            options={versionOptions}
+            placeholder="Choose a version"
+            searchPlaceholder="Search versions…"
+            emptyText="No versions match"
+          />
         </div>
 
-        { }
         <AnimatePresence initial={false}>
           {loader !== 'vanilla' && (
             <motion.div
@@ -363,19 +328,17 @@ export function CreateInstanceDialog({
                   {LOADER_NAME[loader]} has no build for Minecraft {minecraftVersion}. Pick another version.
                 </Callout>
               ) : (
-                <div className="select">
-                  <select value={loaderVersion ?? ''} onChange={(event) => setLoaderVersion(event.target.value)}>
-                    {loaderVersions.map((version) => (
-                      <option key={version.id} value={version.id}>
-                        {shortLoaderVersion(loader, minecraftVersion, version.id)}
-                        {version.recommended ? '  ·  recommended' : version.stable ? '' : '  ·  beta'}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="select__chevron">
-                    <Package size={13} />
-                  </span>
-                </div>
+                <Combobox
+                  value={loaderVersion ?? ''}
+                  onChange={setLoaderVersion}
+                  placeholder={`Choose a ${LOADER_NAME[loader]} build`}
+                  searchPlaceholder="Search builds…"
+                  options={loaderVersions.map((version) => ({
+                    value: version.id,
+                    label: shortLoaderVersion(loader, minecraftVersion, version.id),
+                    hint: version.recommended ? 'recommended' : version.stable ? undefined : 'beta'
+                  }))}
+                />
               )}
             </motion.div>
           )}

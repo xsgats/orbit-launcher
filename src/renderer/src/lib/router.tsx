@@ -1,4 +1,12 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode
+} from 'react'
 
 export interface Route {
 
@@ -63,9 +71,37 @@ export function setQueryParam(key: string, value: string | null): void {
   navigate(`${route.path}${search ? `?${search}` : ''}`, { replace: true })
 }
 
+/** Batched sibling of setQueryParam — one navigation for several params. */
+export function setQueryParams(updates: Record<string, string | null>): void {
+  const route = parse()
+  const query = new URLSearchParams(route.query)
+  for (const [key, value] of Object.entries(updates)) {
+    if (value === null || value === '') query.delete(key)
+    else query.set(key, value)
+  }
+  const search = query.toString()
+  navigate(`${route.path}${search ? `?${search}` : ''}`, { replace: true })
+}
+
 export function useQueryParam(key: string, fallback = ''): string {
   const route = useRoute()
   return route.query.get(key) ?? fallback
+}
+
+/**
+ * Comma-separated list stored in the URL. Keeping filter state in the address
+ * means it survives navigating to a project page and back, which local
+ * component state does not.
+ */
+export function useQueryList(key: string): [string[], (next: string[]) => void] {
+  const route = useRoute()
+  const raw = route.query.get(key) ?? ''
+  const value = useMemo(() => (raw ? raw.split(',').filter(Boolean) : []), [raw])
+  const set = useCallback(
+    (next: string[]) => setQueryParams({ [key]: next.length ? next.join(',') : null }),
+    [key]
+  )
+  return [value, set]
 }
 
 

@@ -11,6 +11,8 @@ import {
   KeyRound,
   Layers,
   Package,
+  Plus,
+  PlusCircle,
   RefreshCw,
   SearchX,
   Sun,
@@ -28,17 +30,19 @@ import type {
 import {
   Button,
   Callout,
+  CheckList,
   Checkbox,
-  Chip,
   EmptyState,
   SearchInput,
   Segmented,
   Select,
-  Skeleton
+  Skeleton,
+  Tooltip
 } from '../components/ui'
+import { InstallDialog, type InstallTarget } from '../components/InstallDialog'
 import { LOADER_NAME, formatCount, formatRelative } from '../lib/format'
-import { navigate, setQueryParam, useQueryParam } from '../lib/router'
-import { api, useOrbit } from '../state/store'
+import { navigate, setQueryParam, setQueryParams, useQueryList, useQueryParam } from '../lib/router'
+import { api, reportError, toast, useOrbit } from '../state/store'
 
 const KINDS: { value: ContentKind; label: string; icon: React.JSX.Element }[] = [
   { value: 'mod', label: 'Mods', icon: <Layers size={14} /> },
@@ -67,13 +71,22 @@ export function DiscoverPage(): React.JSX.Element {
   const instanceId = useQueryParam('instance')
   const targetInstance = instances.find((entry) => entry.id === instanceId) ?? null
 
-  const [query, setQuery] = useState('')
-  const [debounced, setDebounced] = useState('')
-  const [sort, setSort] = useState<StoreSort>('relevance')
-  const [providers, setProviders] = useState<ContentProvider[]>(['modrinth', 'curseforge'])
-  const [gameVersions, setGameVersions] = useState<string[]>([])
-  const [loaders, setLoaders] = useState<LoaderType[]>([])
-  const [categories, setCategories] = useState<string[]>([])
+  const urlQuery = useQueryParam('q')
+  const [query, setQuery] = useState(urlQuery)
+  const [debounced, setDebounced] = useState(urlQuery)
+  const sort = (useQueryParam('sort', 'relevance') || 'relevance') as StoreSort
+  const curseforgeAvailable = Boolean(settings?.curseforgeApiKey?.trim())
+  const [providers, setProviders] = useState<ContentProvider[]>(['modrinth'])
+  const [destinationId, setDestinationId] = useState('')
+  const [installTarget, setInstallTarget] = useState<InstallTarget | null>(null)
+  const [installed, setInstalled] = useState<Set<string>>(new Set())
+
+  const destination = instances.find((entry) => entry.id === destinationId) ?? null
+  const [gameVersions, setGameVersions] = useQueryList('mc')
+  const [loaderList, setLoaderList] = useQueryList('loader')
+  const loaders = loaderList as LoaderType[]
+  const setLoaders = setLoaderList as (next: LoaderType[]) => void
+  const [categories, setCategories] = useQueryList('cat')
   const [categoryList, setCategoryList] = useState<StoreCategory[]>([])
 
   const [result, setResult] = useState<StoreSearchResult | null>(null)
@@ -85,12 +98,41 @@ export function DiscoverPage(): React.JSX.Element {
 
   useEffect(() => {
     if (!targetInstance) return
-    setGameVersions([targetInstance.minecraftVersion])
-    setLoaders(targetInstance.loader === 'vanilla' ? [] : [targetInstance.loader])
+    // Only seed on arrival; once the URL carries filters the user owns them.
+    if (gameVersions.length || loaders.length) return
+    setQueryParams({
+      mc: targetInstance.minecraftVersion,
+      loader: targetInstance.loader === 'vanilla' ? null : targetInstance.loader
+    })
   }, [targetInstance?.id])
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebounced(query), 260)
+    setDestinationId((current) => targetInstance?.id ?? current ?? '')
+  }, [targetInstance?.id])
+
+  /** Picking a destination narrows the results to what will actually load in it. */
+  const chooseDestination = (id: string): void => {
+    setDestinationId(id)
+    const picked = instances.find((entry) => entry.id === id)
+    if (!picked) {
+      setQueryParams({ mc: null, loader: null })
+      return
+    }
+    setQueryParams({
+      mc: picked.minecraftVersion,
+      loader: picked.loader === 'vanilla' ? null : picked.loader
+    })
+  }
+
+  useEffect(() => {
+    setProviders(curseforgeAvailable ? ['modrinth', 'curseforge'] : ['modrinth'])
+  }, [curseforgeAvailable])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounced(query)
+      setQueryParams({ q: query || null })
+    }, 260)
     return () => clearTimeout(timer)
   }, [query])
 
@@ -99,7 +141,7 @@ export function DiscoverPage(): React.JSX.Element {
       .categories(kind)
       .then(setCategoryList)
       .catch(() => setCategoryList([]))
-    setCategories([])
+    setQueryParams({ cat: null })
   }, [kind])
 
   const runSearch = useCallback(
@@ -118,7 +160,9 @@ export function DiscoverPage(): React.JSX.Element {
           sort,
           offset: nextOffset,
           limit: PAGE_SIZE,
-          instanceId: instanceId || null
+          // Annotating against the chosen destination is what makes
+          // "already installed" meaningful.
+          instanceId: destinationId || instanceId || null
         })
         setResult((current) =>
           append && current ? { ...response, hits: [...current.hits, ...response.hits] } : response
@@ -130,7 +174,7 @@ export function DiscoverPage(): React.JSX.Element {
         setLoadingMore(false)
       }
     },
-    [providers, kind, debounced, gameVersions, loaders, categories, sort, instanceId]
+    [providers, kind, debounced, gameVersions, loaders, categories, sort, instanceId, destinationId]
   )
 
   useEffect(() => {
@@ -157,13 +201,28 @@ export function DiscoverPage(): React.JSX.Element {
     return () => observer.disconnect()
   }, [result, offset, loading, loadingMore, runSearch])
 
-  const releaseVersions = useMemo(
-    () => versions.filter((version) => version.type === 'release').slice(0, 60),
-    [versions]
-  )
+  const versionOptions = useMemo(() => {
+    const releases = versions.filter((version) => version.type === 'release')
+    const snapshots = versions.filter((version) => version.type === 'snapshot').slice(0, 80)
+    return [...releases, ...snapshots].map((version) => ({
+      value: version.id,
+      label: version.id,
+      hint: version.type === 'snapshot' ? 'snapshot' : undefined
+    }))
+  }, [versions])
 
   const curseforgeError = result?.errors.find((error) => error.provider === 'curseforge')
   const loaderFilterApplies = kind === 'mod' || kind === 'modpack'
+
+  const hideInstalled = useQueryParam('hide') === '1'
+  const visibleHits = useMemo(() => {
+    if (!result) return []
+    if (!hideInstalled || !destinationId) return result.hits
+    return result.hits.filter(
+      (hit) => !hit.installedVersionId && !installed.has(`${hit.provider}:${hit.id}`)
+    )
+  }, [result, hideInstalled, destinationId, installed])
+  const hiddenCount = (result?.hits.length ?? 0) - visibleHits.length
 
   const toggleProvider = (provider: ContentProvider): void =>
     setProviders((current) =>
@@ -182,7 +241,9 @@ export function DiscoverPage(): React.JSX.Element {
           <p className="page-header__sub">
             {targetInstance
               ? `Installing into ${targetInstance.name} · ${targetInstance.minecraftVersion} ${LOADER_NAME[targetInstance.loader]}`
-              : 'Modrinth and CurseForge, side by side'}
+              : curseforgeAvailable
+                ? 'Modrinth and CurseForge, side by side'
+                : 'Mods, modpacks, resource packs and shaders from Modrinth'}
           </p>
         </div>
         {targetInstance && (
@@ -202,97 +263,116 @@ export function DiscoverPage(): React.JSX.Element {
         />
         <Select
           value={sort}
-          onChange={(value) => setSort(value as StoreSort)}
+          onChange={(value) => setQueryParams({ sort: value === 'relevance' ? null : value })}
           options={SORTS}
           small
           className="shrink"
         />
       </div>
 
+      {kind !== 'modpack' && instances.length > 0 && (
+        <div className="row gap-3 surface" style={{ padding: '9px 14px', marginBottom: 'var(--s-4)' }}>
+          <PlusCircle size={15} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+          <span className="t-small dim" style={{ flexShrink: 0 }}>
+            Add to
+          </span>
+          <Select
+            small
+            value={destinationId}
+            onChange={chooseDestination}
+            options={[
+              { value: '', label: 'Choose an instance…' },
+              ...instances.map((entry) => ({
+                value: entry.id,
+                label: `${entry.name} — ${entry.minecraftVersion} ${LOADER_NAME[entry.loader]}`
+              }))
+            ]}
+          />
+          <span className="grow" />
+          {destination && (
+            <Checkbox
+              checked={hideInstalled}
+              onChange={(value) => setQueryParams({ hide: value ? '1' : null })}
+              label={hiddenCount > 0 ? `Hide installed (${hiddenCount})` : 'Hide installed'}
+            />
+          )}
+        </div>
+      )}
+
       <div className="store-layout">
         <aside className="store-filters">
-          <div>
-            <div className="filter-group__title">Sources</div>
-            <div className="col gap-1">
-              <ProviderToggle
-                provider="modrinth"
-                label="Modrinth"
-                enabled={settings?.enableModrinth ?? true}
-                checked={providers.includes('modrinth')}
-                onToggle={() => toggleProvider('modrinth')}
-              />
-              <ProviderToggle
-                provider="curseforge"
-                label="CurseForge"
-                enabled={settings?.enableCurseForge ?? true}
-                checked={providers.includes('curseforge')}
-                onToggle={() => toggleProvider('curseforge')}
-              />
-            </div>
-          </div>
-
-          {loaderFilterApplies && (
+          {curseforgeAvailable && (
             <div>
-              <div className="filter-group__title">Mod loader</div>
-              <div className="row wrap gap-2">
-                {(['fabric', 'quilt', 'forge', 'neoforge'] as LoaderType[]).map((loader) => (
-                  <Chip
-                    key={loader}
-                    selected={loaders.includes(loader)}
-                    onClick={() =>
-                      setLoaders((current) =>
-                        current.includes(loader) ? current.filter((entry) => entry !== loader) : [...current, loader]
-                      )
-                    }
-                  >
-                    {LOADER_NAME[loader]}
-                  </Chip>
-                ))}
+              <div className="filter-group__title">Sources</div>
+              <div className="col gap-1">
+                <ProviderToggle
+                  provider="modrinth"
+                  label="Modrinth"
+                  enabled={settings?.enableModrinth ?? true}
+                  checked={providers.includes('modrinth')}
+                  onToggle={() => toggleProvider('modrinth')}
+                />
+                <ProviderToggle
+                  provider="curseforge"
+                  label="CurseForge"
+                  enabled={settings?.enableCurseForge ?? true}
+                  checked={providers.includes('curseforge')}
+                  onToggle={() => toggleProvider('curseforge')}
+                />
               </div>
             </div>
           )}
 
-          <div>
-            <div className="filter-group__title">Minecraft version</div>
-            <div className="row wrap gap-2" style={{ maxHeight: 168, overflowY: 'auto' }}>
-              {releaseVersions.map((version) => (
-                <Chip
-                  key={version.id}
-                  selected={gameVersions.includes(version.id)}
-                  onClick={() =>
-                    setGameVersions((current) =>
-                      current.includes(version.id)
-                        ? current.filter((entry) => entry !== version.id)
-                        : [...current, version.id]
-                    )
-                  }
-                >
-                  {version.id}
-                </Chip>
-              ))}
+          {loaderFilterApplies && (
+            <div>
+              <div className="filter-group__title">Mod loader</div>
+              <CheckList
+                options={(['fabric', 'quilt', 'forge', 'neoforge'] as LoaderType[]).map((loader) => ({
+                  value: loader,
+                  label: LOADER_NAME[loader],
+                  accent: `var(--loader-${loader})`
+                }))}
+                selected={loaders}
+                onChange={(next) => setLoaders(next as LoaderType[])}
+                maxHeight={150}
+              />
             </div>
+          )}
+
+          <div>
+            <div className="row between gap-2">
+              <div className="filter-group__title">Minecraft version</div>
+              {gameVersions.length > 0 && <span className="chip chip--accent">{gameVersions.length}</span>}
+            </div>
+            <CheckList
+              options={versionOptions}
+              selected={gameVersions}
+              onChange={setGameVersions}
+              searchable
+              searchPlaceholder="Search versions…"
+              maxHeight={196}
+              emptyText="No versions match"
+            />
           </div>
 
           {categoryList.length > 0 && (
             <div>
-              <div className="filter-group__title">Categories</div>
-              <div className="row wrap gap-2" style={{ maxHeight: 240, overflowY: 'auto' }}>
-                {categoryList.slice(0, 40).map((category) => (
-                  <Chip
-                    key={`${category.id}-${category.name}`}
-                    selected={categories.includes(category.id)}
-                    onClick={() =>
-                      setCategories((current) =>
-                        current.includes(category.id)
-                          ? current.filter((entry) => entry !== category.id)
-                          : [...current, category.id]
-                      )
-                    }
-                  >
-                    {category.name}
-                  </Chip>
-                ))}
+              <div className="row between gap-2">
+                <div className="filter-group__title">Categories</div>
+                {categories.length > 0 && <span className="chip chip--accent">{categories.length}</span>}
               </div>
+              <CheckList
+                options={categoryList.map((category) => ({
+                  value: category.id,
+                  label: category.name
+                }))}
+                selected={categories}
+                onChange={setCategories}
+                searchable={categoryList.length > 8}
+                searchPlaceholder="Search categories…"
+                maxHeight={240}
+                emptyText="No categories match"
+              />
             </div>
           )}
 
@@ -300,11 +380,7 @@ export function DiscoverPage(): React.JSX.Element {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => {
-                setGameVersions([])
-                setLoaders([])
-                setCategories([])
-              }}
+              onClick={() => setQueryParams({ mc: null, loader: null, cat: null })}
             >
               Clear filters
             </Button>
@@ -312,14 +388,10 @@ export function DiscoverPage(): React.JSX.Element {
         </aside>
 
         <div className="col gap-4">
-          {curseforgeError && (
+          {curseforgeAvailable && curseforgeError && (
             <Callout tone="warning" icon={<KeyRound size={16} />}>
-              <strong>CurseForge is not connected.</strong> {curseforgeError.message}
-              <div style={{ marginTop: 10 }}>
-                <Button size="sm" onClick={() => navigate('/settings/integrations')}>
-                  Add an API key
-                </Button>
-              </div>
+              <strong>CurseForge could not be reached.</strong> {curseforgeError.message} Modrinth results are still
+              shown below.
             </Callout>
           )}
 
@@ -342,7 +414,7 @@ export function DiscoverPage(): React.JSX.Element {
                 </div>
               ))}
             </div>
-          ) : !result || result.hits.length === 0 ? (
+          ) : !result || visibleHits.length === 0 ? (
             <EmptyState
               icon={debounced ? <SearchX size={26} /> : <Compass size={26} />}
               title={debounced ? 'No results' : 'Nothing to show'}
@@ -361,9 +433,25 @@ export function DiscoverPage(): React.JSX.Element {
               </div>
 
               <div className="store-grid">
-                {result.hits.map((project, index) => (
-                  <ProjectCard key={`${project.provider}-${project.id}-${index}`} project={project} />
-                ))}
+                {visibleHits.map((project, index) => {
+                  const key = `${project.provider}:${project.id}`
+                  return (
+                    <ProjectCard
+                      key={`${project.provider}-${project.id}-${index}`}
+                      project={project}
+                      installed={installed.has(key) || Boolean(project.installedVersionId)}
+                      onAdd={() =>
+                        setInstallTarget({
+                          provider: project.provider,
+                          projectId: project.id,
+                          projectName: project.name,
+                          kind,
+                          iconUrl: project.iconUrl
+                        })
+                      }
+                    />
+                  )
+                })}
               </div>
 
               <div ref={sentinel} style={{ height: 1 }} />
@@ -377,6 +465,19 @@ export function DiscoverPage(): React.JSX.Element {
           )}
         </div>
       </div>
+
+      <InstallDialog
+        target={installTarget}
+        open={Boolean(installTarget)}
+        onClose={() => setInstallTarget(null)}
+        defaultInstanceId={destinationId || undefined}
+        onInstalled={() => {
+          if (installTarget) {
+            const key = `${installTarget.provider}:${installTarget.projectId}`
+            setInstalled((current) => new Set(current).add(key))
+          }
+        }}
+      />
     </div>
   )
 }
@@ -415,7 +516,15 @@ function ProviderToggle({
   )
 }
 
-function ProjectCard({ project }: { project: StoreProject }): React.JSX.Element {
+function ProjectCard({
+  project,
+  installed,
+  onAdd
+}: {
+  project: StoreProject
+  installed: boolean
+  onAdd: () => void
+}): React.JSX.Element {
   return (
     <motion.article
       className="scard"
@@ -425,6 +534,21 @@ function ProjectCard({ project }: { project: StoreProject }): React.JSX.Element 
       transition={{ duration: 0.2 }}
       onClick={() => navigate(`/discover/${project.provider}/${project.id}`)}
     >
+      <Tooltip content={installed ? 'Installed — add another version' : 'Choose a version to add'}>
+        <button
+          className="scard__quick"
+          data-state={installed ? 'done' : 'idle'}
+          aria-label="Add to an instance"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation()
+            onAdd()
+          }}
+        >
+          {installed ? <Check size={16} /> : <Plus size={17} strokeWidth={2.6} />}
+        </button>
+      </Tooltip>
+
       <div className="scard__top">
         <div className="scard__icon">
           {project.iconUrl ? (

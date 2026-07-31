@@ -33,6 +33,7 @@ import {
   Skeleton,
   Tabs
 } from '../components/ui'
+import { InstallDialog } from '../components/InstallDialog'
 import { LOADER_NAME, formatBytes, formatCount, formatDate, formatRelative } from '../lib/format'
 import { navigate } from '../lib/router'
 import { api, reportError, toast, useOrbit } from '../state/store'
@@ -66,6 +67,7 @@ export function ProjectPage({
   const [targetInstanceId, setTargetInstanceId] = useState('')
   const [withDependencies, setWithDependencies] = useState(true)
   const [installing, setInstalling] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
   const [onlyCompatible, setOnlyCompatible] = useState(true)
 
   useEffect(() => {
@@ -238,19 +240,37 @@ export function ProjectPage({
               </div>
 
               <div className="col gap-2" style={{ flexShrink: 0, width: 200 }}>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  block
-                  icon={<PlusCircle size={16} />}
-                  disabled={!versions?.length || (!isModpack && instances.length === 0)}
-                  onClick={() => {
-                    const best = compatibleVersions[0] ?? versions?.[0]
-                    if (best) startInstall(best)
-                  }}
-                >
-                  {isModpack ? 'Install pack' : 'Install'}
-                </Button>
+                {isModpack ? (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    block
+                    icon={<PlusCircle size={16} />}
+                    disabled={!versions?.length}
+                    onClick={() => {
+                      const best = compatibleVersions[0] ?? versions?.[0]
+                      if (best) startInstall(best)
+                    }}
+                  >
+                    Install pack
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      block
+                      icon={<PlusCircle size={16} />}
+                      disabled={!versions?.length || instances.length === 0}
+                      onClick={() => setAddOpen(Boolean(project))}
+                    >
+                      Add to instance
+                    </Button>
+                    <span className="dimmer" style={{ fontSize: 11.5, textAlign: 'center', lineHeight: 1.5 }}>
+                      Pick a version and where it goes
+                    </span>
+                  </>
+                )}
 
                 {!isModpack && instances.length === 0 && (
                   <span className="dimmer" style={{ fontSize: 11.5, textAlign: 'center' }}>
@@ -425,6 +445,23 @@ export function ProjectPage({
         </>
       )}
 
+      <InstallDialog
+        target={
+          project
+            ? {
+                provider,
+                projectId,
+                projectName: project.name,
+                kind: project.kind,
+                iconUrl: project.iconUrl
+              }
+            : null
+        }
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        defaultInstanceId={targetInstanceId || undefined}
+      />
+
       <Lightbox src={preview} onClose={() => setPreview(null)} />
 
       <Dialog
@@ -562,18 +599,18 @@ function renderMarkdown(markdown: string): string {
   const blocks: string[] = []
   let text = markdown.replace(/```([\s\S]*?)```/g, (_match, code: string) => {
     blocks.push(`<pre><code>${escapeHtml(code.replace(/^\w*\n/, ''))}</code></pre>`)
-    return ` BLOCK${blocks.length - 1} `
+    return `@@BLOCK${blocks.length - 1}@@`
   })
 
 
   const rawHtml: string[] = []
   text = text.replace(/<(img|br|hr|p|div|center|a|h[1-6]|table|tbody|tr|td|th|ul|ol|li|strong|em|b|i)[\s\S]*?>/gi, (match) => {
     rawHtml.push(sanitizeHtml(match))
-    return ` HTML${rawHtml.length - 1} `
+    return `@@HTML${rawHtml.length - 1}@@`
   })
   text = text.replace(/<\/(img|br|hr|p|div|center|a|h[1-6]|table|tbody|tr|td|th|ul|ol|li|strong|em|b|i)>/gi, (match) => {
     rawHtml.push(match)
-    return ` HTML${rawHtml.length - 1} `
+    return `@@HTML${rawHtml.length - 1}@@`
   })
 
   text = escapeHtml(text)
@@ -601,13 +638,13 @@ function renderMarkdown(markdown: string): string {
       const trimmed = paragraph.trim()
       if (!trimmed) return ''
       if (/^<(h\d|ul|ol|pre|blockquote|hr|table|div|p|img|center)/.test(trimmed)) return trimmed
-      if (/^ (BLOCK|HTML)\d+ $/.test(trimmed)) return trimmed
+      if (/^@@(BLOCK|HTML)\d+@@$/.test(trimmed)) return trimmed
       return `<p>${trimmed.replace(/\n/g, '<br>')}</p>`
     })
     .join('\n')
 
-  text = text.replace(/ BLOCK(\d+) /g, (_match, index: string) => blocks[Number(index)] ?? '')
-  text = text.replace(/ HTML(\d+) /g, (_match, index: string) => rawHtml[Number(index)] ?? '')
+  text = text.replace(/@@BLOCK(\d+)@@/g, (_match, index: string) => blocks[Number(index)] ?? '')
+  text = text.replace(/@@HTML(\d+)@@/g, (_match, index: string) => rawHtml[Number(index)] ?? '')
 
   return text
 }

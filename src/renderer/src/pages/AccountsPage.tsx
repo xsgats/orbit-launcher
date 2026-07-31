@@ -8,12 +8,15 @@ import {
   LogIn,
   RefreshCw,
   ShieldCheck,
+  Shirt,
   Trash2,
   TriangleAlert,
   UserRound
 } from 'lucide-react'
 import type { Account, AuthProgress } from '@shared/types'
-import { Button, Callout, ConfirmDialog, EmptyState, IconButton, TextField } from '../components/ui'
+import { SkinManager } from '../components/SkinManager'
+import { SkinPreview } from '../components/SkinPreview'
+import { Button, Callout, ConfirmDialog, EmptyState, IconButton } from '../components/ui'
 import { formatDateTime, formatRelative } from '../lib/format'
 import { api, reportError, toast, useOrbit } from '../state/store'
 
@@ -27,14 +30,10 @@ export function AccountsPage(): React.JSX.Element {
   const [adding, setAdding] = useState(false)
   const [progress, setProgress] = useState<AuthProgress | null>(null)
   const [removing, setRemoving] = useState<Account | null>(null)
-  const [clientId, setClientId] = useState(settings?.msaClientId ?? '')
+  const [skinTarget, setSkinTarget] = useState<Account | null>(null)
   const [refreshingId, setRefreshingId] = useState<string | null>(null)
 
-  useEffect(() => setClientId(settings?.msaClientId ?? ''), [settings?.msaClientId])
-
   useEffect(() => api.on('auth:progress', setProgress), [])
-
-  const configured = Boolean(settings?.msaClientId.trim())
 
   const addAccount = async (): Promise<void> => {
     setAdding(true)
@@ -65,7 +64,6 @@ export function AccountsPage(): React.JSX.Element {
           variant="primary"
           icon={<LogIn size={16} />}
           loading={adding}
-          disabled={!configured}
           onClick={() => void addAccount()}
         >
           Add account
@@ -73,75 +71,6 @@ export function AccountsPage(): React.JSX.Element {
       </header>
 
       <div className="col gap-5">
-        {!configured && (
-          <Callout tone="accent" icon={<KeyRound size={17} />}>
-            <strong>One-time setup: register a Microsoft application.</strong>
-            <p style={{ marginTop: 8, lineHeight: 1.65 }}>
-              Microsoft requires every launcher to authenticate under its own Azure registration. It is free and takes
-              a couple of minutes.
-            </p>
-            <ol
-              style={{
-                marginTop: 10,
-                paddingLeft: 20,
-                listStyle: 'decimal',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-                lineHeight: 1.6
-              }}
-            >
-              <li>
-                Open the{' '}
-                <a
-                  href="#"
-                  style={{ color: 'var(--accent)' }}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    void api.app.openExternal(
-                      'https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade'
-                    )
-                  }}
-                >
-                  Azure app registrations portal
-                </a>{' '}
-                and choose <strong>New registration</strong>.
-              </li>
-              <li>
-                Name it anything, and set supported account types to{' '}
-                <strong>Personal Microsoft accounts only</strong>.
-              </li>
-              <li>
-                Add a <strong>Mobile and desktop applications</strong> redirect URI of{' '}
-                <code>http://localhost</code>.
-              </li>
-              <li>
-                Copy the <strong>Application (client) ID</strong> and paste it below.
-              </li>
-            </ol>
-            <div className="row gap-2" style={{ marginTop: 14, alignItems: 'flex-end' }}>
-              <TextField
-                className="grow"
-                label="Application (client) ID"
-                placeholder="00000000-0000-0000-0000-000000000000"
-                mono
-                value={clientId}
-                onChange={(event) => setClientId(event.target.value)}
-              />
-              <Button
-                variant="primary"
-                disabled={!clientId.trim()}
-                onClick={async () => {
-                  await updateSettings({ msaClientId: clientId.trim() })
-                  toast('Sign-in is ready', 'You can now add a Microsoft account.')
-                }}
-              >
-                Save
-              </Button>
-            </div>
-          </Callout>
-        )}
-
         {adding && progress && (
           <Callout tone="accent" icon={<RefreshCw size={16} className="spin" />}>
             <strong>{progress.message}</strong>
@@ -158,16 +87,11 @@ export function AccountsPage(): React.JSX.Element {
           <EmptyState
             icon={<UserRound size={26} />}
             title="No accounts yet"
-            description={
-              configured
-                ? 'Sign in with the Microsoft account that owns Minecraft. Orbit stores your session encrypted with Windows DPAPI and never sees your password.'
-                : 'Add your Azure application ID above, then sign in.'
-            }
+            description="Sign in with the Microsoft account that owns Minecraft. Orbit stores your session encrypted with Windows DPAPI and never sees your password."
             action={
               <Button
                 variant="primary"
                 icon={<LogIn size={16} />}
-                disabled={!configured}
                 loading={adding}
                 onClick={() => void addAccount()}
               >
@@ -179,14 +103,17 @@ export function AccountsPage(): React.JSX.Element {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 'var(--s-4)' }}>
             {accounts.map((account) => (
               <div className="account-card" key={account.id} data-active={activeAccount?.id === account.id}>
-                <img
-                  className="account-card__skin"
-                  src={`https://mc-heads.net/avatar/${account.uuid}/152`}
-                  alt=""
-                  onError={(event) => {
-                    ;(event.currentTarget as HTMLImageElement).style.visibility = 'hidden'
-                  }}
-                />
+                <div className="account-card__skin center" style={{ padding: 4 }}>
+                  <SkinPreview
+                    src={
+                      account.skins.find((skin) => skin.state === 'ACTIVE')?.url ??
+                      account.skins[0]?.url ??
+                      null
+                    }
+                    variant={account.skins[0]?.variant ?? 'CLASSIC'}
+                    scale={2}
+                  />
+                </div>
 
                 <div className="grow" style={{ minWidth: 0 }}>
                   <div className="row gap-2">
@@ -224,6 +151,9 @@ export function AccountsPage(): React.JSX.Element {
                   </div>
 
                   <div className="row gap-2" style={{ marginTop: 14 }}>
+                    <Button size="sm" icon={<Shirt size={13} />} onClick={() => setSkinTarget(account)}>
+                      Skin &amp; cape
+                    </Button>
                     {activeAccount?.id !== account.id && (
                       <Button
                         size="sm"
@@ -245,6 +175,9 @@ export function AccountsPage(): React.JSX.Element {
                 </div>
 
                 <div className="col gap-1">
+                  <IconButton label="Skin & cape" onClick={() => setSkinTarget(account)}>
+                    <Shirt size={15} />
+                  </IconButton>
                   <IconButton
                     label="Refresh session"
                     disabled={refreshingId === account.id}
@@ -282,6 +215,12 @@ export function AccountsPage(): React.JSX.Element {
           has no offline, cracked or third-party authentication mode.
         </Callout>
       </div>
+
+      <SkinManager
+        account={skinTarget ? (accounts.find((entry) => entry.id === skinTarget.id) ?? skinTarget) : null}
+        open={Boolean(skinTarget)}
+        onClose={() => setSkinTarget(null)}
+      />
 
       <ConfirmDialog
         open={Boolean(removing)}

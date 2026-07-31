@@ -5,6 +5,7 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode
@@ -961,6 +962,298 @@ export function Callout({
 
 
 
+
+export interface ComboboxOption {
+  value: string
+  label: string
+  hint?: string
+  group?: string
+  disabled?: boolean
+}
+
+export function Combobox({
+  value,
+  onChange,
+  options,
+  label,
+  hint,
+  placeholder = 'Select…',
+  searchPlaceholder = 'Type to search…',
+  emptyText = 'No matches',
+  disabled,
+  small,
+  maxVisible = 300,
+  className = ''
+}: {
+  value: string
+  onChange: (value: string) => void
+  options: ComboboxOption[]
+  label?: string
+  hint?: string
+  placeholder?: string
+  searchPlaceholder?: string
+  emptyText?: string
+  disabled?: boolean
+  small?: boolean
+  maxVisible?: number
+  className?: string
+}): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [active, setActive] = useState(0)
+  const trigger = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLDivElement>(null)
+  const input = useRef<HTMLInputElement>(null)
+  const [box, setBox] = useState<{ left: number; top: number; width: number } | null>(null)
+
+  const selected = options.find((option) => option.value === value)
+
+  const matches = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return options
+    return options.filter((option) =>
+      `${option.label} ${option.value} ${option.hint ?? ''} ${option.group ?? ''}`.toLowerCase().includes(needle)
+    )
+  }, [options, query])
+
+  const visible = matches.slice(0, maxVisible)
+  const hiddenCount = matches.length - visible.length
+
+  useLayoutEffect(() => {
+    if (!open || !trigger.current) return
+    const rect = trigger.current.getBoundingClientRect()
+    const height = Math.min(340, visible.length * 32 + 62)
+    const flip = rect.bottom + height + 10 > window.innerHeight && rect.top > height
+    setBox({
+      left: rect.left,
+      top: flip ? rect.top - height - 6 : rect.bottom + 6,
+      width: Math.max(rect.width, 220)
+    })
+  }, [open, visible.length])
+
+  useEffect(() => {
+    if (!open) return
+    setQuery('')
+    setActive(Math.max(0, options.findIndex((option) => option.value === value)))
+    const timer = setTimeout(() => input.current?.focus(), 20)
+    return () => clearTimeout(timer)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    const onPointer = (event: MouseEvent): void => {
+      const target = event.target as Node
+      if (panel.current?.contains(target) || trigger.current?.contains(target)) return
+      setOpen(false)
+    }
+    window.addEventListener('mousedown', onPointer)
+    window.addEventListener('resize', () => setOpen(false), { once: true })
+    return () => window.removeEventListener('mousedown', onPointer)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    panel.current?.querySelector<HTMLElement>(`[data-index="${active}"]`)?.scrollIntoView({ block: 'nearest' })
+  }, [active, open])
+
+  const commit = (option: ComboboxOption): void => {
+    if (option.disabled) return
+    onChange(option.value)
+    setOpen(false)
+    trigger.current?.focus()
+  }
+
+  return (
+    <div className={`field ${className}`}>
+      {label && <span className="field__label">{label}</span>}
+
+      <button
+        ref={trigger}
+        type="button"
+        className={`combo ${small ? 'combo--sm' : ''}`}
+        data-open={open || undefined}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === 'ArrowDown' || event.key === 'Enter') {
+            event.preventDefault()
+            setOpen(true)
+          }
+        }}
+      >
+        <span className={`grow truncate ${selected ? '' : 'dimmer'}`} style={{ textAlign: 'left' }}>
+          {selected?.label ?? placeholder}
+        </span>
+        {selected?.hint && <span className="combo__hint">{selected.hint}</span>}
+        <ChevronDown size={14} className="combo__chevron" />
+      </button>
+
+      {hint && <span className="field__hint">{hint}</span>}
+
+      {open &&
+        box &&
+        createPortal(
+          <motion.div
+            ref={panel}
+            className="combo__panel"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.12 }}
+            style={{ left: box.left, top: box.top, width: box.width }}
+            role="listbox"
+          >
+            <div className="combo__search">
+              <Search size={14} />
+              <input
+                ref={input}
+                value={query}
+                placeholder={searchPlaceholder}
+                spellCheck={false}
+                onChange={(event) => {
+                  setQuery(event.target.value)
+                  setActive(0)
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'ArrowDown') {
+                    event.preventDefault()
+                    setActive((current) => Math.min(current + 1, visible.length - 1))
+                  } else if (event.key === 'ArrowUp') {
+                    event.preventDefault()
+                    setActive((current) => Math.max(current - 1, 0))
+                  } else if (event.key === 'Enter') {
+                    event.preventDefault()
+                    if (visible[active]) commit(visible[active])
+                  } else if (event.key === 'Escape') {
+                    event.preventDefault()
+                    setOpen(false)
+                  }
+                }}
+              />
+              {query && (
+                <button className="iconbtn" onClick={() => setQuery('')} aria-label="Clear" type="button">
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            <div className="combo__list">
+              {visible.length === 0 && <div className="combo__empty">{emptyText}</div>}
+
+              {visible.map((option, index) => {
+                const showGroup = option.group && option.group !== visible[index - 1]?.group
+                return (
+                  <div key={option.value}>
+                    {showGroup && <div className="combo__group">{option.group}</div>}
+                    <button
+                      type="button"
+                      className="combo__option"
+                      data-index={index}
+                      data-active={index === active || undefined}
+                      data-selected={option.value === value || undefined}
+                      disabled={option.disabled}
+                      role="option"
+                      aria-selected={option.value === value}
+                      onMouseEnter={() => setActive(index)}
+                      onClick={() => commit(option)}
+                    >
+                      <span className="grow truncate" style={{ textAlign: 'left' }}>
+                        {option.label}
+                      </span>
+                      {option.hint && <span className="combo__hint">{option.hint}</span>}
+                      {option.value === value && <Check size={13} className="combo__check" />}
+                    </button>
+                  </div>
+                )
+              })}
+
+              {hiddenCount > 0 && <div className="combo__empty">{hiddenCount} more — keep typing to narrow</div>}
+            </div>
+          </motion.div>,
+          document.body
+        )}
+    </div>
+  )
+}
+
+export interface CheckOption {
+  value: string
+  label: string
+  hint?: string
+  accent?: string
+}
+
+export function CheckList({
+  options,
+  selected,
+  onChange,
+  searchable,
+  searchPlaceholder = 'Search…',
+  maxHeight = 210,
+  emptyText = 'Nothing to show',
+  columns = 1
+}: {
+  options: CheckOption[]
+  selected: string[]
+  onChange: (next: string[]) => void
+  searchable?: boolean
+  searchPlaceholder?: string
+  maxHeight?: number
+  emptyText?: string
+  columns?: number
+}): React.JSX.Element {
+  const [query, setQuery] = useState('')
+
+  const matches = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return options
+    return options.filter((option) => `${option.label} ${option.hint ?? ''}`.toLowerCase().includes(needle))
+  }, [options, query])
+
+  const toggle = (value: string): void =>
+    onChange(selected.includes(value) ? selected.filter((entry) => entry !== value) : [...selected, value])
+
+  return (
+    <div className="checklist">
+      {searchable && (
+        <div className="checklist__search">
+          <Search size={13} />
+          <input
+            value={query}
+            placeholder={searchPlaceholder}
+            spellCheck={false}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          {query && (
+            <button className="iconbtn" onClick={() => setQuery('')} aria-label="Clear" type="button">
+              <X size={12} />
+            </button>
+          )}
+        </div>
+      )}
+
+      <div
+        className="checklist__items"
+        style={{
+          maxHeight,
+          gridTemplateColumns: columns > 1 ? `repeat(${columns}, minmax(0, 1fr))` : undefined
+        }}
+      >
+        {matches.length === 0 && <div className="combo__empty">{emptyText}</div>}
+        {matches.map((option) => (
+          <label key={option.value} className="checklist__item">
+            <Checkbox checked={selected.includes(option.value)} onChange={() => toggle(option.value)} />
+            <span className="grow truncate" style={{ color: option.accent }}>
+              {option.label}
+            </span>
+            {option.hint && <span className="combo__hint">{option.hint}</span>}
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export function Lightbox({ src, onClose }: { src: string | null; onClose: () => void }): React.JSX.Element {
   useEffect(() => {

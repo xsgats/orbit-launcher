@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   AlertTriangle,
+  ArrowUpCircle,
   Bell,
   Boxes,
   CheckCircle2,
@@ -17,6 +18,7 @@ import {
   Maximize2,
   Minus,
   Newspaper,
+  RotateCw,
   Settings,
   Square,
   UserRound,
@@ -29,10 +31,35 @@ import { Logo } from './Logo'
 import { IconButton, ProgressRing, Tooltip, useAnchoredMenu } from './ui'
 import { NotificationPanel } from './NotificationPanel'
 import { AccountSwitcher } from './AccountSwitcher'
+import { UpdateDialog } from './UpdateDialog'
 
 
 
 
+
+/**
+ * Reserved space for a future ad unit. Renders a quiet placeholder for now so
+ * the layout is already sized for it and nothing shifts when a real unit lands.
+ * Sizes match common fixed slots: 160x600 half-page in the sidebar, 728x90
+ * leaderboard elsewhere.
+ */
+export function AdSlot({
+  placement = 'sidebar'
+}: {
+  placement?: 'sidebar' | 'wide'
+}): React.JSX.Element | null {
+  const enabled = useOrbit((state) => state.settings?.showAdPlaceholders ?? true)
+  if (!enabled) return null
+
+  return (
+    <aside className="adslot" data-placement={placement} aria-label="Advertisement">
+      <span className="adslot__tag">Ad</span>
+      <span className="adslot__text">
+        {placement === 'sidebar' ? 'Sponsored slot' : 'Sponsored — 728 × 90'}
+      </span>
+    </aside>
+  )
+}
 
 export function Ambient(): React.JSX.Element {
   return (
@@ -46,6 +73,60 @@ export function Ambient(): React.JSX.Element {
 
 
 
+
+/**
+ * Sits beside the bell and only appears once there is something to act on, so
+ * the titlebar stays quiet on the common path. One click does the obvious next
+ * step for whichever state the updater is in.
+ */
+function UpdateButton(): React.JSX.Element | null {
+  const state = useOrbit((store) => store.updateState)
+  const [open, setOpen] = useState(false)
+
+  const status = state?.status
+  const actionable = status === 'available' || status === 'downloading' || status === 'ready'
+  if (!state || !actionable) return null
+
+  const version = state.version ?? ''
+  const ready = status === 'ready'
+  const label = ready
+    ? `Orbit ${version} is ready to install`
+    : status === 'downloading'
+      ? `Downloading Orbit ${version} — ${Math.round(state.progress * 100)}%`
+      : `Orbit ${version} is available`
+
+  return (
+    <>
+      <IconButton
+        label={label}
+        className={ready ? 'iconbtn--attention' : ''}
+        onClick={() => setOpen(true)}
+        style={{ position: 'relative', color: ready ? undefined : 'var(--accent)' }}
+      >
+        {status === 'downloading' ? (
+          <ProgressRing value={state.progress} size={26} stroke={2.5} />
+        ) : (
+          <>
+            {ready ? <RotateCw size={16} /> : <ArrowUpCircle size={16} />}
+            <span
+              style={{
+                position: 'absolute',
+                top: 4,
+                right: 4,
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                boxShadow: '0 0 0 2px var(--bg-canvas)'
+              }}
+            />
+          </>
+        )}
+      </IconButton>
+      <UpdateDialog open={open} onClose={() => setOpen(false)} />
+    </>
+  )
+}
 
 export function TitleBar({ onOpenSearch }: { onOpenSearch: () => void }): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
@@ -108,6 +189,8 @@ export function TitleBar({ onOpenSearch }: { onOpenSearch: () => void }): React.
             </button>
           </Tooltip>
         )}
+
+        <UpdateButton />
 
         <div style={{ position: 'relative' }}>
           <IconButton
@@ -234,6 +317,8 @@ export function Sidebar(): React.JSX.Element {
         <div className="sidebar__section">Library</div>
         {secondary.map(renderItem)}
       </div>
+
+      {!collapsed && <AdSlot placement="sidebar" />}
 
       <div style={{ position: 'relative' }}>
         <AccountSwitcher open={switcherOpen} onClose={() => setSwitcherOpen(false)} />

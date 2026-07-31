@@ -67,9 +67,10 @@ nsis:
 
 
 publish:
-  - provider: generic
-    url: https://releases.orbitlauncher.app/win32-x64
-    channel: latest
+  - provider: github
+    owner: xsgats
+    repo: orbit-launcher
+    releaseType: release
 
 compression: maximum
 removePackageScripts: true

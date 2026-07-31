@@ -1,14 +1,20 @@
 import { app, BrowserWindow, dialog, ipcMain, nativeImage, shell } from 'electron'
 import { cpus, freemem, release, totalmem } from 'node:os'
 import { basename } from 'node:path'
-import type { ContentKind, ContentProvider, LoaderType } from '../shared/types'
-import type { InstallVersionRequest, BackupOptions, InstanceExportOptions } from '../shared/api'
+import type { ContentKind, ContentProvider, LoaderType, SkinVariant } from '../shared/types'
+import type {
+  BackupOptions,
+  InstallVersionRequest,
+  InstanceExportOptions,
+  QuickInstallRequest
+} from '../shared/api'
 import { log } from './core/logger'
 import { paths } from './core/paths'
 import { settings } from './core/settings'
 import { exists } from './core/fsx'
 import { readZipJson } from './core/zip'
 import { accounts } from './services/accounts'
+import * as skins from './services/accounts/skins'
 import * as content from './services/content'
 import { instances } from './services/instances'
 import { java } from './services/java'
@@ -151,6 +157,29 @@ export function registerIpc(): void {
   handle('accounts:refresh', (id: string) => accounts.refresh(id))
   handle('accounts:cancelLogin', () => accounts.cancelLogin())
 
+  /* ---------------------------------------------------------------- */
+  /* Skins                                                            */
+  /* ---------------------------------------------------------------- */
+
+  handle('skins:refresh', (id: string) => skins.refresh(id))
+  handle('skins:upload', (id: string, path: string, variant: SkinVariant) =>
+    skins.uploadSkinFile(id, path, variant)
+  )
+  handle('skins:reset', (id: string) => skins.resetSkin(id))
+  handle('skins:setCape', (id: string, capeId: string | null) => skins.setCape(id, capeId))
+  handle('skins:activeUrl', (id: string) => skins.activeSkinUrl(id))
+  handle('skins:library', () => skins.listLibrary())
+  handle('skins:addToLibrary', (path: string, name: string, variant: SkinVariant) =>
+    skins.addToLibrary(path, name, variant)
+  )
+  handle('skins:saveCurrentToLibrary', (id: string, name: string) => skins.saveCurrentToLibrary(id, name))
+  handle('skins:removeFromLibrary', (id: string) => skins.removeFromLibrary(id))
+  handle('skins:renameInLibrary', (id: string, name: string) => skins.renameInLibrary(id, name))
+  handle('skins:applyFromLibrary', (accountId: string, id: string) => skins.applyFromLibrary(accountId, id))
+  handle('skins:openLibraryFolder', async () => {
+    await shell.openPath(await skins.libraryFolder())
+  })
+
 
 
 
@@ -292,6 +321,9 @@ export function registerIpc(): void {
   )
   handle('store:categories', (kind: ContentKind) => store.categories(kind))
   handle('store:install', (req: InstallVersionRequest) => store.install(req))
+  handle('store:recommendedVersion', (instanceId: string, provider: ContentProvider, projectId: string, kind: ContentKind) =>
+    store.recommendedVersion({ instanceId, provider, projectId, kind })
+  )
   handle('store:installModpack', (provider: ContentProvider, projectId: string, versionId: string, name?: string) =>
     store.installModpack(provider, projectId, versionId, name)
   )

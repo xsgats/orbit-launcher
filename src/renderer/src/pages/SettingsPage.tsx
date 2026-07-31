@@ -354,12 +354,16 @@ function LaunchSection({ settings, patch }: SectionProps): React.JSX.Element {
       <Row title="Game window size" description="Ignored when an instance starts fullscreen.">
         <div className="row gap-2" style={{ width: 240 }}>
           <TextField
+            className="grow"
             type="number"
+            min={640}
             value={settings.windowWidth}
             onChange={(event) => patch({ windowWidth: Number(event.target.value) || 1280 })}
           />
           <TextField
+            className="grow"
             type="number"
+            min={480}
             value={settings.windowHeight}
             onChange={(event) => patch({ windowHeight: Number(event.target.value) || 720 })}
           />
@@ -437,19 +441,15 @@ function DownloadsSection({
 
 
 function IntegrationsSection({ settings, patch }: SectionProps): React.JSX.Element {
-  const [key, setKey] = useState(settings.curseforgeApiKey)
-  const [clientId, setClientId] = useState(settings.msaClientId)
-
-  useEffect(() => setKey(settings.curseforgeApiKey), [settings.curseforgeApiKey])
-  useEffect(() => setClientId(settings.msaClientId), [settings.msaClientId])
+  const curseforgeAvailable = settings.curseforgeApiKey.trim().length > 0
 
   return (
     <Section
       id="integrations"
       title="Integrations"
-      description="Orbit talks to Modrinth and CurseForge directly. Both are optional and can be turned off."
+      description="Where Orbit looks for mods, modpacks and packs."
     >
-      <Row title="Modrinth" description="Open API, no key required. Powers search, updates and .mrpack imports.">
+      <Row title="Modrinth" description="Powers search, update checks and .mrpack imports.">
         <Switch
           checked={settings.enableModrinth}
           onChange={(value) => patch({ enableModrinth: value })}
@@ -460,77 +460,20 @@ function IntegrationsSection({ settings, patch }: SectionProps): React.JSX.Eleme
       <Row
         title="CurseForge"
         description={
-          <>
-            Requires a free personal API key from the CurseForge developer console.{' '}
-            <a
-              href="#"
-              style={{ color: 'var(--accent)' }}
-              onClick={(event) => {
-                event.preventDefault()
-                void api.app.openExternal('https://console.curseforge.com/#/api-keys')
-              }}
-            >
-              Get a key
-            </a>
-            .
-          </>
+          curseforgeAvailable
+            ? 'Browse and install CurseForge mods and modpacks alongside Modrinth.'
+            : 'Not available in this build. Modrinth covers search, installs and updates on its own.'
         }
       >
-        <Switch
-          checked={settings.enableCurseForge}
-          onChange={(value) => patch({ enableCurseForge: value })}
-          label="Enable CurseForge"
-        />
-      </Row>
-
-      {settings.enableCurseForge && (
-        <Row title="CurseForge API key" description="Stored locally and sent only to api.curseforge.com.">
-          <div className="row gap-2" style={{ width: 340 }}>
-            <TextField
-              className="grow"
-              type="password"
-              mono
-              placeholder="$2a$10$…"
-              value={key}
-              onChange={(event) => setKey(event.target.value)}
-            />
-            <Button
-              variant={key !== settings.curseforgeApiKey ? 'primary' : 'secondary'}
-              disabled={key === settings.curseforgeApiKey}
-              onClick={() => {
-                patch({ curseforgeApiKey: key.trim() })
-                toast('CurseForge connected')
-              }}
-            >
-              Save
-            </Button>
-          </div>
-        </Row>
-      )}
-
-      <Row
-        title="Microsoft application ID"
-        description="Your own Azure registration, used for account sign-in. See the Accounts page for setup steps."
-      >
-        <div className="row gap-2" style={{ width: 340 }}>
-          <TextField
-            className="grow"
-            mono
-            placeholder="00000000-0000-0000-0000-000000000000"
-            value={clientId}
-            onChange={(event) => setClientId(event.target.value)}
+        {curseforgeAvailable ? (
+          <Switch
+            checked={settings.enableCurseForge}
+            onChange={(value) => patch({ enableCurseForge: value })}
+            label="Enable CurseForge"
           />
-          <Button
-            variant={clientId !== settings.msaClientId ? 'primary' : 'secondary'}
-            disabled={clientId === settings.msaClientId}
-            onClick={() => {
-              patch({ msaClientId: clientId.trim() })
-              toast('Sign-in configuration saved')
-            }}
-          >
-            Save
-          </Button>
-        </div>
+        ) : (
+          <span className="chip">Unavailable</span>
+        )}
       </Row>
 
       <div style={{ padding: '4px 0 var(--s-4)' }}>

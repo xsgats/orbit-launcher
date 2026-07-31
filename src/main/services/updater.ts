@@ -7,13 +7,21 @@ import { notifications } from './notifications'
 
 type ElectronUpdater = typeof import('electron-updater')
 
+const RELEASE_PAGE = 'https://github.com/xsgats/orbit-launcher/releases/tag'
+
 let state: UpdateState = {
   status: 'idle',
   version: null,
   notes: null,
   progress: 0,
   error: null,
-  currentVersion: app.getVersion()
+  currentVersion: app.getVersion(),
+  releaseUrl: null
+}
+
+/** electron-builder tags GitHub releases as v${version}. */
+function releaseUrlFor(version: string | undefined): string | null {
+  return version ? `${RELEASE_PAGE}/v${version}` : null
 }
 
 let autoUpdater: ElectronUpdater['autoUpdater'] | null = null
@@ -71,7 +79,12 @@ export async function initUpdater(): Promise<void> {
   autoUpdater.on('checking-for-update', () => publish({ status: 'checking', error: null }))
 
   autoUpdater.on('update-available', (info) => {
-    publish({ status: 'available', version: info.version, notes: notesFrom(info) })
+    publish({
+      status: 'available',
+      version: info.version,
+      notes: notesFrom(info),
+      releaseUrl: releaseUrlFor(info.version)
+    })
     notifications.push({
       title: `Orbit ${info.version} is available`,
       body: settings.get().autoDownloadUpdates
@@ -89,7 +102,12 @@ export async function initUpdater(): Promise<void> {
   })
 
   autoUpdater.on('update-downloaded', (info) => {
-    publish({ status: 'ready', version: info.version, progress: 1 })
+    publish({
+      status: 'ready',
+      version: info.version,
+      progress: 1,
+      releaseUrl: releaseUrlFor(info.version)
+    })
     notifications.push({
       title: `Orbit ${info.version} is ready to install`,
       body: 'Restart Orbit to finish updating.',

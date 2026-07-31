@@ -46,11 +46,12 @@ export const DEFAULT_JAVA_ARGS =
 function createDefaults(): AppSettings {
   return {
     theme: 'dark',
-    accentColor: '#6C7BFF',
+    accentColor: '#4F7CD4',
     reduceMotion: false,
     uiScale: 1,
     instanceCardSize: 'regular',
     showInstanceBackgrounds: true,
+    showAdPlaceholders: true,
 
     memoryMinMb: 1024,
     memoryMaxMb: defaultMaxMemory(),

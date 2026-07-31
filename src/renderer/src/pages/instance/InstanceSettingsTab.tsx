@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Cpu, Image, ImageOff, RotateCcw, Save, Sparkles, Terminal, Wrench } from 'lucide-react'
 import type { InstanceSettings, InstanceSummary, LoaderType, LoaderVersion } from '@shared/types'
-import { PRESET_ICON_GLYPHS, PRESET_ICON_KEYS } from '../../components/InstanceCard'
-import { Logo } from '../../components/Logo'
+import { LetterTile, useInstanceImages } from '../../components/InstanceCard'
 import {
   Button,
   Callout,
@@ -26,7 +25,7 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
   const [name, setName] = useState(instance.name)
   const [group, setGroup] = useState(instance.group ?? '')
   const [tags, setTags] = useState(instance.tags.join(', '))
-  const [icon, setIcon] = useState(instance.icon.type === 'preset' ? instance.icon.key : '')
+  const { iconUrl } = useInstanceImages(instance)
   const [settings, setSettings] = useState<InstanceSettings>(instance.settings)
   const [dirty, setDirty] = useState(false)
 
@@ -39,7 +38,6 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
     setName(instance.name)
     setGroup(instance.group ?? '')
     setTags(instance.tags.join(', '))
-    setIcon(instance.icon.type === 'preset' ? instance.icon.key : '')
     setSettings(instance.settings)
     setLoader(instance.loader)
     setLoaderVersion(instance.loaderVersion)
@@ -84,7 +82,6 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
           .split(',')
           .map((tag) => tag.trim())
           .filter(Boolean),
-        icon: icon ? { type: 'preset', key: icon } : instance.icon,
         settings
       })
       await refreshInstances()
@@ -161,48 +158,60 @@ export function InstanceSettingsTab({ instance }: { instance: InstanceSummary })
             <div className="field__label" style={{ marginBottom: 8 }}>
               Icon
             </div>
-            <div className="row wrap gap-2">
-              {PRESET_ICON_KEYS.map((key) => (
-                <button
-                  key={key}
-                  onClick={() => {
-                    setIcon(key)
-                    setDirty(true)
-                  }}
-                  type="button"
-                  title={key}
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 'var(--r-sm)',
-                    display: 'grid',
-                    placeItems: 'center',
-                    fontSize: 18,
-                    background: icon === key ? 'var(--accent-a14)' : 'var(--surface-1)',
-                    border: `1px solid ${icon === key ? 'var(--accent)' : 'var(--border-subtle)'}`
-                  }}
-                >
-                  {PRESET_ICON_GLYPHS[key] || <Logo size={21} glow={false} />}
-                </button>
-              ))}
-              <Button
-                size="sm"
-                variant="ghost"
-                icon={<Image size={14} />}
-                onClick={async () => {
-                  const path = await api.app.pickFile(
-                    [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'] }],
-                    'Choose an icon'
-                  )
-                  if (!path) return
-                  await api.instances.setIconFromFile(instance.id, path)
-                  await refreshInstances()
-                  setIcon('')
-                  toast('Icon updated')
+            <div className="row gap-3">
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 'var(--r-md)',
+                  overflow: 'hidden',
+                  border: '1px solid var(--border)',
+                  flexShrink: 0
                 }}
               >
-                Custom image…
-              </Button>
+                {iconUrl ? (
+                  <img src={iconUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <LetterTile name={name || instance.name} seed={instance.id + instance.name} size={56} />
+                )}
+              </div>
+
+              <div className="col gap-2">
+                <div className="row gap-2">
+                  <Button
+                    size="sm"
+                    icon={<Image size={14} />}
+                    onClick={async () => {
+                      const path = await api.app.pickFile(
+                        [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'] }],
+                        'Choose an image'
+                      )
+                      if (!path) return
+                      await api.instances.setIconFromFile(instance.id, path)
+                      await refreshInstances()
+                      toast('Icon updated')
+                    }}
+                  >
+                    {iconUrl ? 'Change image' : 'Choose image'}
+                  </Button>
+                  {iconUrl && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        await api.instances.update(instance.id, { icon: { type: 'preset', key: 'letter' } })
+                        await refreshInstances()
+                        toast('Icon reset')
+                      }}
+                    >
+                      Use letter
+                    </Button>
+                  )}
+                </div>
+                <span className="field__hint">
+                  {iconUrl ? 'A custom image is in use.' : 'Falls back to the first letter of the name.'}
+                </span>
+              </div>
             </div>
           </div>
 

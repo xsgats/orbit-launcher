@@ -10,7 +10,7 @@ import type {
   StoreSearchResult,
   StoreVersion
 } from '../../../shared/types'
-import type { InstallVersionRequest } from '../../../shared/api'
+import type { InstallVersionRequest, QuickInstallRequest } from '../../../shared/api'
 import { copyDir, readJson, removePath } from '../../core/fsx'
 import { log } from '../../core/logger'
 import { paths } from '../../core/paths'
@@ -246,6 +246,60 @@ async function resolveDependencies(
   }
 
   return out
+}
+
+/**
+ * The version a one-click install should choose: the newest stable release that
+ * actually fits the instance, falling back to the newest pre-release. Unlike
+ * bestVersion this never settles for something incompatible — a quick action
+ * has no dialog in which to warn the user.
+ */
+function pickRecommended(
+  candidates: StoreVersion[],
+  minecraftVersion: string,
+  loader: LoaderType,
+  kind: ContentKind
+): StoreVersion | null {
+  const loaderMatters = kind === 'mod'
+
+  const compatible = candidates.filter(
+    (version) =>
+      version.gameVersions.includes(minecraftVersion) &&
+      (!loaderMatters || loader === 'vanilla' || !version.loaders.length || version.loaders.includes(loader))
+  )
+  if (!compatible.length) return null
+
+  const newestFirst = [...compatible].sort(
+    (a, b) => new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime()
+  )
+  return newestFirst.find((version) => version.channel === 'release') ?? newestFirst[0]
+}
+
+async function resolveRecommended(
+  request: QuickInstallRequest
+): Promise<{ instance: Instance; version: StoreVersion | null; projectName: string }> {
+  const instance = await instances.require(request.instanceId)
+
+  const filtered = await versions(request.provider, request.projectId, {
+    gameVersions: [instance.minecraftVersion],
+    loaders: request.kind === 'mod' && instance.loader !== 'vanilla' ? [instance.loader] : undefined
+  }).catch(() => [] as StoreVersion[])
+
+  let chosen = pickRecommended(filtered, instance.minecraftVersion, instance.loader, request.kind)
+
+  // Provider-side filters are advisory; re-check against the full list before
+  // concluding that nothing fits.
+  if (!chosen) {
+    const all = await versions(request.provider, request.projectId).catch(() => [] as StoreVersion[])
+    chosen = pickRecommended(all, instance.minecraftVersion, instance.loader, request.kind)
+  }
+
+  const detail = await project(request.provider, request.projectId).catch(() => null)
+  return { instance, version: chosen, projectName: detail?.name ?? chosen?.name ?? 'That project' }
+}
+
+export async function recommendedVersion(request: QuickInstallRequest): Promise<StoreVersion | null> {
+  return (await resolveRecommended(request)).version
 }
 
 export async function install(request: InstallVersionRequest): Promise<void> {

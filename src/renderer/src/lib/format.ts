@@ -149,6 +149,16 @@ export function artworkColors(seed: string): { a: string; b: string } {
   }
 }
 
+export function letterTileColors(seed: string): { from: string; to: string } {
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
+  const hue = hash % 360
+  return {
+    from: `hsl(${hue} 62% 52%)`,
+    to: `hsl(${(hue + 42 + (hash % 40)) % 360} 58% 38%)`
+  }
+}
+
 export function initials(name: string): string {
   const parts = name.trim().split(/[\s_-]+/).filter(Boolean)
   if (!parts.length) return '?'

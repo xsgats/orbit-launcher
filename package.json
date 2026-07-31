@@ -1,13 +1,17 @@
 {
   "name": "orbit-launcher",
   "productName": "Orbit Launcher",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A next-generation Minecraft launcher for Windows.",
   "author": {
     "name": "Orbit",
     "email": "hello@orbitlauncher.app"
   },
   "homepage": "https://orbitlauncher.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xsgats/orbit-launcher.git"
+  },
   "license": "GPL-3.0-or-later",
   "private": true,
   "main": "./out/main/index.js",
@@ -21,7 +25,8 @@
     "icons": "node scripts/generate-icons.mjs",
     "verify:package": "node scripts/verify-package.mjs",
     "dist": "npm run build && electron-builder --win --publish never && npm run verify:package",
-    "dist:dir": "npm run build && electron-builder --win --dir --publish never && npm run verify:package"
+    "dist:dir": "npm run build && electron-builder --win --dir --publish never && npm run verify:package",
+    "release": "node scripts/release.mjs"
   },
   "dependencies": {
     "archiver": "^7.0.1",

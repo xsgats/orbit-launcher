@@ -21,13 +21,10 @@
   background: var(--bg-canvas);
 }
 
+/* Deliberately flat: the drifting gradient wash read as decoration, not chrome. */
 .ambient::before,
 .ambient::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  will-change: transform;
+  content: none;
 }
 
 .ambient::before {
@@ -49,19 +46,12 @@
 }
 
 .ambient__accent {
-  position: absolute;
-  width: 40vw;
-  height: 40vw;
-  top: 28%;
-  left: 46%;
-  border-radius: 50%;
-  filter: blur(110px);
-  background: radial-gradient(circle, var(--aurora-2), transparent 70%);
-  animation: drift-c 50s var(--ease-in-out) infinite alternate;
+  display: none;
 }
 
 
 .ambient__grain {
+  display: none;
   position: absolute;
   inset: 0;
   opacity: 0.028;
@@ -92,8 +82,8 @@
   padding-left: var(--s-4);
   -webkit-app-region: drag;
   border-bottom: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg-canvas) 76%, transparent);
-  backdrop-filter: blur(24px) saturate(150%);
+  background: var(--bg-base);
+  backdrop-filter: none;
   position: relative;
   z-index: 30;
 }
@@ -111,10 +101,7 @@
   font: 640 14.5px/1 var(--font-ui);
   letter-spacing: 0.11em;
   text-transform: uppercase;
-  background: linear-gradient(96deg, var(--text-primary) 12%, var(--accent) 58%, var(--cyan) 96%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text-primary);
 }
 
 .titlebar__center {
@@ -225,8 +212,8 @@
   gap: var(--s-2);
   padding: var(--s-4) var(--s-3) var(--s-3);
   border-right: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg-canvas) 55%, transparent);
-  backdrop-filter: blur(20px);
+  background: var(--bg-base);
+  backdrop-filter: none;
   min-height: 0;
   overflow: hidden;
 }
@@ -284,8 +271,7 @@
   width: 3px;
   height: 18px;
   border-radius: 0 var(--r-full) var(--r-full) 0;
-  background: linear-gradient(180deg, var(--accent), var(--cyan));
-  box-shadow: 0 0 12px var(--accent-glow);
+  background: var(--accent);
 }
 
 .nav-item__icon {
