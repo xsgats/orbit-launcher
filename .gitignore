@@ -3,6 +3,7 @@ out/
 dist/
 release/
 .claude/
+CLAUDE.md
 
 # Never commit build credentials.
 .env
