@@ -133,6 +133,7 @@ export function TitleBar({ onOpenSearch }: { onOpenSearch: () => void }): React.
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const unread = useUnreadCount()
   const tasks = useActiveTasks()
+  const appVersion = useOrbit((state) => state.updateState?.currentVersion)
 
   useEffect(() => {
     void api.app.windowIsMaximized().then(setMaximized)
@@ -150,6 +151,7 @@ export function TitleBar({ onOpenSearch }: { onOpenSearch: () => void }): React.
       <Link to="/" className="titlebar__brand">
         <Logo size={24} />
         <span className="titlebar__wordmark">Orbit</span>
+        {appVersion && <span className="titlebar__version">{appVersion}</span>}
       </Link>
 
       <div className="titlebar__center">

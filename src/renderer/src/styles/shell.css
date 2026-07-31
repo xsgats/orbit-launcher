@@ -104,6 +104,15 @@
   color: var(--text-primary);
 }
 
+.titlebar__version {
+  font: 500 11px/1 var(--font-ui);
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+  padding: 3px 6px;
+  border-radius: var(--r-xs, 5px);
+  background: var(--surface-2);
+}
+
 .titlebar__center {
   flex: 1;
   display: flex;
